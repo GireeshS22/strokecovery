@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strokecovery - Your Companion Through Stroke Recovery</title>
+    <meta name="description" content="Strokecovery helps stroke and TBI survivors manage their recovery journey with medication reminders, therapy tracking, and community support.">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Strokecovery - Your Companion Through Stroke Recovery">
+    <meta property="og:description" content="Medication reminders, therapy tracking, and community support for stroke survivors and caregivers.">
+    <meta property="og:type" content="website">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Config (contains Supabase credentials) -->
+    <script src="config.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#F0FDFA',
+                            100: '#CCFBF1',
+                            200: '#99F6E4',
+                            300: '#5EEAD4',
+                            400: '#2DD4BF',
+                            500: '#14B8A6',
+                            600: '#0D9488',
+                            700: '#0F766E',
+                            800: '#115E59',
+                            900: '#134E4A',
+                        },
+                        accent: {
+                            50: '#FFF7ED',
+                            100: '#FFEDD5',
+                            200: '#FED7AA',
+                            300: '#FDBA74',
+                            400: '#FB923C',
+                            500: '#F97316',
+                            600: '#EA580C',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #F0FDFA 0%, #FFFFFF 50%, #FFF7ED 100%);
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
+        }
+
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(13, 148, 136, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -4px rgba(249, 115, 22, 0.4);
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+
+<body class="gradient-bg min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">Strokecovery</span>
+                </div>
+
+                <!-- CTA Button -->
+                <a href="#waitlist" class="btn-primary text-white px-5 py-2.5 rounded-full font-semibold text-sm">
+                    Join Waitlist
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto">
+                <!-- Badge -->
+                <div class="inline-flex items-center px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-medium mb-6">
+                    <span class="w-2 h-2 bg-primary-500 rounded-full mr-2 animate-pulse"></span>
+                    Coming Soon
+                </div>
+
+                <!-- Headline -->
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+                    Your companion through
+                    <span class="text-primary-600"> stroke recovery</span>
+                </h1>
+
+                <!-- Subheadline -->
+                <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                    Never miss a medication. Track your therapy progress. Connect with others who understand your journey. Strokecovery is the daily companion for stroke and TBI survivors.
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#waitlist" class="btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center justify-center">
+                        Get Early Access
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </a>
+                    <a href="#features" class="bg-white text-gray-700 px-8 py-4 rounded-full font-semibold text-lg border-2 border-gray-200 hover:border-primary-300 hover:text-primary-600 transition-colors inline-flex items-center justify-center">
+                        Learn More
+                    </a>
+                </div>
+
+                <!-- Trust Indicator -->
+                <p class="mt-8 text-sm text-gray-500">
+                    Built for stroke survivors, TBI patients, and their caregivers
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <!-- Section Header -->
+            <div class="text-center mb-16">
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                    Everything you need for recovery
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Simple tools designed for the challenges of stroke recovery
+                </p>
+            </div>
+
+            <!-- Feature Cards -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Feature 1: Medicine Reminders -->
+                <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                    <div class="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Medicine Reminders</h3>
+                    <p class="text-gray-600">Never miss a dose. Get timely notifications for all your medications.</p>
+                </div>
+
+                <!-- Feature 2: Therapy Tracking -->
+                <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                    <div class="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Therapy Calendar</h3>
+                    <p class="text-gray-600">Log PT, OT, and speech therapy sessions. See your progress over time.</p>
+                </div>
+
+                <!-- Feature 3: Recovery Journal -->
+                <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                    <div class="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Recovery Journal</h3>
+                    <p class="text-gray-600">Track symptoms, mood, and daily wins. Share reports with your doctor.</p>
+                </div>
+
+                <!-- Feature 4: Community Support -->
+                <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                    <div class="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Community Support</h3>
+                    <p class="text-gray-600">Connect with other survivors and caregivers. You're not alone.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Who It's For Section -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+                <!-- Left: Content -->
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+                        Built for the recovery journey
+                    </h2>
+                    <p class="text-xl text-gray-600 mb-8">
+                        We understand that stroke recovery is a marathon, not a sprint. Strokecovery is designed to support you every step of the way.
+                    </p>
+
+                    <div class="space-y-6">
+                        <!-- Stroke Survivors -->
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Stroke Survivors</h3>
+                                <p class="text-gray-600">Manage your daily recovery with easy-to-use tools designed for your needs.</p>
+                            </div>
+                        </div>
+
+                        <!-- TBI Patients -->
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">TBI Patients</h3>
+                                <p class="text-gray-600">Track your cognitive progress and therapy with tools that adapt to you.</p>
+                            </div>
+                        </div>
+
+                        <!-- Caregivers -->
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Caregivers</h3>
+                                <p class="text-gray-600">Stay connected to your loved one's progress. Coordinate care with confidence.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Stats/Visual -->
+                <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="text-center p-6 bg-primary-50 rounded-2xl">
+                            <div class="text-4xl font-bold text-primary-600 mb-2">12M+</div>
+                            <div class="text-gray-600 text-sm">Strokes per year worldwide</div>
+                        </div>
+                        <div class="text-center p-6 bg-accent-50 rounded-2xl">
+                            <div class="text-4xl font-bold text-accent-600 mb-2">80%</div>
+                            <div class="text-gray-600 text-sm">Need ongoing support after discharge</div>
+                        </div>
+                        <div class="text-center p-6 bg-gray-50 rounded-2xl">
+                            <div class="text-4xl font-bold text-gray-700 mb-2">3-12</div>
+                            <div class="text-gray-600 text-sm">Months of intensive recovery</div>
+                        </div>
+                        <div class="text-center p-6 bg-primary-50 rounded-2xl">
+                            <div class="text-4xl font-bold text-primary-600 mb-2">1 in 4</div>
+                            <div class="text-gray-600 text-sm">Survivors are under 65</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-6 bg-gray-50 rounded-2xl">
+                        <p class="text-gray-700 italic text-center">
+                            "Recovery isn't linear. Some days are harder than others. But you're not alone in this journey."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Daily Stroke Bites Preview -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                    Daily Stroke Bites
+                </h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Quick tips and facts to keep you informed and motivated every day
+                </p>
+            </div>
+
+            <!-- Stroke Bites Preview Cards -->
+            <div class="flex justify-center">
+                <div class="relative w-full max-w-md">
+                    <!-- Card 3 (back) -->
+                    <div class="absolute top-4 left-4 right-4 h-48 bg-primary-100 rounded-2xl transform rotate-3"></div>
+                    <!-- Card 2 (middle) -->
+                    <div class="absolute top-2 left-2 right-2 h-48 bg-primary-200 rounded-2xl transform -rotate-2"></div>
+                    <!-- Card 1 (front) -->
+                    <div class="relative bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">Did you know?</span>
+                            <span class="text-gray-400 text-sm">Daily tip</span>
+                        </div>
+                        <p class="text-xl text-gray-800 leading-relaxed">
+                            The brain can form new neural pathways for years after stroke. Every therapy session helps build these connections.
+                        </p>
+                        <div class="mt-6 flex items-center justify-between">
+                            <span class="text-primary-600 font-medium">Swipe for more</span>
+                            <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Waitlist Section -->
+    <section id="waitlist" class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto">
+            <div class="hero-gradient rounded-3xl p-8 sm:p-12 text-center text-white">
+                <h2 class="text-3xl sm:text-4xl font-bold mb-4">
+                    Be the first to know
+                </h2>
+                <p class="text-xl text-primary-100 mb-8">
+                    Join our waitlist and get early access when we launch. Help us build the app that stroke survivors deserve.
+                </p>
+
+                <!-- Waitlist Form -->
+                <form id="waitlist-form" class="max-w-md mx-auto" onsubmit="return handleSubmit(event)">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            required
+                            class="flex-1 px-6 py-4 rounded-full text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-white/30"
+                        >
+                        <button
+                            type="submit"
+                            id="submit-btn"
+                            class="btn-primary px-8 py-4 rounded-full font-semibold text-white whitespace-nowrap"
+                        >
+                            Join Waitlist
+                        </button>
+                    </div>
+
+                    <!-- Form Messages -->
+                    <div id="form-message" class="mt-4 text-sm hidden"></div>
+                </form>
+
+                <p class="mt-6 text-sm text-primary-200">
+                    No spam, ever. We'll only email you about launch updates.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-200">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2 mb-6 md:mb-0">
+                    <div class="w-10 h-10 rounded-xl hero-gradient flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">Strokecovery</span>
+                </div>
+
+                <!-- Copyright -->
+                <div class="text-gray-500 text-sm">
+                    &copy; 2025 Strokecovery. Made with care for stroke survivors.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Form Submission Script - Connected to Supabase -->
+    <script>
+        // Initialize Supabase client
+        let supabaseClient = null;
+
+        try {
+            if (typeof SUPABASE_CONFIG !== 'undefined' && window.supabase) {
+                supabaseClient = window.supabase.createClient(
+                    SUPABASE_CONFIG.url,
+                    SUPABASE_CONFIG.anonKey
+                );
+                console.log('Supabase client initialized');
+            } else {
+                console.error('Supabase config or client not loaded');
+            }
+        } catch (e) {
+            console.error('Failed to initialize Supabase:', e);
+        }
+
+        // Form submission handler
+        async function handleSubmit(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const email = document.getElementById('email').value;
+            const messageDiv = document.getElementById('form-message');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // Show loading state
+            submitBtn.textContent = 'Joining...';
+            submitBtn.disabled = true;
+
+            try {
+                if (!supabaseClient) {
+                    throw new Error('Supabase not initialized');
+                }
+
+                // Insert email into Supabase waitlist table
+                const { data, error } = await supabaseClient
+                    .from('waitlist')
+                    .insert([{ email: email }]);
+
+                if (error) {
+                    console.error('Supabase error:', error);
+                    // Check if it's a duplicate email error
+                    if (error.code === '23505') {
+                        messageDiv.textContent = "You're already on the waitlist! We'll notify you when we launch.";
+                        messageDiv.className = 'mt-4 text-sm text-white bg-white/20 rounded-lg p-3';
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    messageDiv.textContent = "Thank you! We'll notify you when we launch.";
+                    messageDiv.className = 'mt-4 text-sm text-white bg-white/20 rounded-lg p-3';
+                }
+
+                messageDiv.classList.remove('hidden');
+                submitBtn.textContent = 'Joined!';
+                document.getElementById('email').value = '';
+
+                // Reset button after 3 seconds
+                setTimeout(function() {
+                    submitBtn.textContent = 'Join Waitlist';
+                    submitBtn.disabled = false;
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error:', error);
+                messageDiv.textContent = 'Something went wrong. Please try again.';
+                messageDiv.className = 'mt-4 text-sm text-white bg-red-500/30 rounded-lg p-3';
+                messageDiv.classList.remove('hidden');
+
+                submitBtn.textContent = 'Join Waitlist';
+                submitBtn.disabled = false;
+            }
+
+            return false; // Prevent form submission
+        }
+    </script>
+
+</body>
+</html>
