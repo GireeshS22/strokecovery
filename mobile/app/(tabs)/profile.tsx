@@ -1,9 +1,35 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { router } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
 import { Colors } from '../../constants/colors';
-import { removeToken } from '../../services/api';
+import { removeToken, authApi } from '../../services/api';
 
 export default function ProfileScreen() {
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string>('patient');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadUserData = async () => {
+    try {
+      const userData = await authApi.me();
+      setUserName(userData.name);
+      setUserRole(userData.role);
+      setUserEmail(userData.email);
+    } catch (error) {
+      console.log('Failed to load user data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reload data when screen comes into focus (e.g., after editing profile)
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData();
+    }, [])
+  );
+
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -23,15 +49,31 @@ export default function ProfileScreen() {
       {/* Profile Header */}
       <View style={styles.header}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>👤</Text>
+          {isLoading ? (
+            <ActivityIndicator color={Colors.primary[600]} />
+          ) : (
+            <Text style={styles.avatarText}>
+              {userName ? userName.charAt(0).toUpperCase() : '👤'}
+            </Text>
+          )}
         </View>
-        <Text style={styles.name}>Stroke Survivor</Text>
-        <Text style={styles.role}>Patient</Text>
+        <Text style={styles.name}>
+          {isLoading ? 'Loading...' : (userName || 'Stroke Survivor')}
+        </Text>
+        <Text style={styles.role}>
+          {userRole === 'caregiver' ? 'Caregiver' : 'Patient'}
+        </Text>
+        {userEmail && !isLoading && (
+          <Text style={styles.email}>{userEmail}</Text>
+        )}
       </View>
 
       {/* Menu Items */}
       <View style={styles.menu}>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => router.push('/edit-profile')}
+        >
           <Text style={styles.menuIcon}>📝</Text>
           <Text style={styles.menuLabel}>Edit Profile</Text>
           <Text style={styles.menuArrow}>›</Text>
@@ -105,6 +147,11 @@ const styles = StyleSheet.create({
   role: {
     fontSize: 14,
     color: Colors.gray[500],
+    marginTop: 4,
+  },
+  email: {
+    fontSize: 13,
+    color: Colors.gray[400],
     marginTop: 4,
   },
   menu: {

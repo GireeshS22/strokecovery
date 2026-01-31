@@ -8,6 +8,7 @@ class UserCreate(BaseModel):
     """Schema for user registration."""
     email: EmailStr
     password: str
+    name: Optional[str] = None
     role: str = "patient"  # "patient" or "caregiver"
 
 
@@ -21,12 +22,18 @@ class UserResponse(BaseModel):
     """Schema for user response (no password)."""
     id: UUID
     email: str
+    name: Optional[str] = None
     role: str
     auth_provider: str
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+
+class UserUpdate(BaseModel):
+    """Schema for updating user info."""
+    name: Optional[str] = None
 
 
 class Token(BaseModel):

@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { authApi, setToken, profileApi } from '../../services/api';
 
@@ -19,6 +20,7 @@ export default function WelcomeScreen() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<'patient' | 'caregiver'>('patient');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -105,15 +107,27 @@ export default function WelcomeScreen() {
             autoComplete="email"
           />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor={Colors.gray[400]}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete={isLogin ? 'current-password' : 'new-password'}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Password"
+              placeholderTextColor={Colors.gray[400]}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+            />
+            <TouchableOpacity
+              style={styles.eyeButton}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Feather
+                name={showPassword ? 'eye' : 'eye-off'}
+                size={20}
+                color={Colors.gray[500]}
+              />
+            </TouchableOpacity>
+          </View>
 
           {/* Role selector - only for sign up */}
           {!isLogin && (
@@ -254,6 +268,25 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     fontSize: 16,
     color: Colors.gray[900],
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gray[50],
+    borderWidth: 1,
+    borderColor: Colors.gray[200],
+    borderRadius: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: Colors.gray[900],
+  },
+  eyeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   roleContainer: {
     marginTop: 8,

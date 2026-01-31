@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,8 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { Colors } from '../constants/colors';
-import { profileApi, authApi } from '../services/api';
+import { Config } from '../constants/config';
+import { profileApi, authApi, getToken } from '../services/api';
 
 const STROKE_TYPES = [
   { id: 'ischemic', label: 'Ischemic', desc: 'Blood clot blocked artery' },
@@ -34,7 +35,7 @@ const THERAPIES = [
   { id: 'Speech', label: 'Speech Therapy' },
 ];
 
-export default function OnboardingScreen() {
+export default function EditProfileScreen() {
   const [name, setName] = useState('');
   const [strokeDate, setStrokeDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -42,6 +43,71 @@ export default function OnboardingScreen() {
   const [affectedSide, setAffectedSide] = useState<string | null>(null);
   const [therapies, setTherapies] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    console.log('=== LOADING PROFILE ===');
+    console.log('API URL:', Config.API_URL);
+
+    try {
+      // Check if we have a token
+      const token = await getToken();
+      console.log('Token exists:', !!token);
+
+      if (!token) {
+        Alert.alert('Error', 'Not logged in. Please login again.');
+        setIsFetching(false);
+        return;
+      }
+
+      // Fetch user data first
+      let userData = null;
+      try {
+        console.log('Fetching user data...');
+        userData = await authApi.me();
+        console.log('User data:', JSON.stringify(userData));
+        if (userData?.name) {
+          setName(userData.name);
+        }
+      } catch (userError: any) {
+        console.log('Failed to fetch user:', userError.message);
+        Alert.alert('API Error', 'User: ' + userError.message);
+      }
+
+      // Then fetch profile data
+      try {
+        const profileData = await profileApi.get();
+        console.log('Profile data:', profileData);
+
+        if (profileData) {
+          if (profileData.stroke_date) {
+            setStrokeDate(new Date(profileData.stroke_date));
+          }
+          if (profileData.stroke_type) {
+            setStrokeType(profileData.stroke_type);
+          }
+          if (profileData.affected_side) {
+            setAffectedSide(profileData.affected_side);
+          }
+          if (profileData.current_therapies) {
+            setTherapies(profileData.current_therapies);
+          }
+        }
+      } catch (profileError: any) {
+        console.log('Failed to fetch profile:', profileError.message);
+        // Profile might not exist yet, that's okay
+      }
+    } catch (error: any) {
+      console.log('Load profile error:', error);
+      Alert.alert('Error', error.message || 'Failed to load profile data');
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-US', {
@@ -66,24 +132,24 @@ export default function OnboardingScreen() {
     );
   };
 
-  const handleComplete = async () => {
+  const handleSave = async () => {
     setIsLoading(true);
 
     try {
-      // Update user name if provided
-      if (name.trim()) {
-        await authApi.updateMe({ name: name.trim() });
-      }
+      // Update user name
+      await authApi.updateMe({ name: name.trim() || undefined });
 
-      // Save profile data
-      await profileApi.onboarding({
+      // Update profile data
+      await profileApi.update({
         stroke_date: strokeDate ? strokeDate.toISOString().split('T')[0] : undefined,
         stroke_type: strokeType || undefined,
         affected_side: affectedSide || undefined,
         current_therapies: therapies.length > 0 ? therapies : undefined,
       });
 
-      router.replace('/(tabs)/home');
+      Alert.alert('Success', 'Profile updated successfully', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to save profile');
     } finally {
@@ -91,14 +157,23 @@ export default function OnboardingScreen() {
     }
   };
 
+  if (isFetching) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.primary[600]} />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Let's set up your profile</Text>
-        <Text style={styles.subtitle}>
-          This helps us personalize your recovery journey
-        </Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Edit Profile</Text>
       </View>
 
       {/* Name Input */}
@@ -116,7 +191,7 @@ export default function OnboardingScreen() {
 
       {/* Stroke Date */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>When did your stroke occur? (optional)</Text>
+        <Text style={styles.sectionTitle}>Stroke date</Text>
         <TouchableOpacity
           style={styles.dateButton}
           onPress={() => setShowDatePicker(true)}
@@ -126,6 +201,15 @@ export default function OnboardingScreen() {
           </Text>
           <Text style={styles.dateIcon}>📅</Text>
         </TouchableOpacity>
+
+        {strokeDate && (
+          <TouchableOpacity
+            style={styles.clearButton}
+            onPress={() => setStrokeDate(null)}
+          >
+            <Text style={styles.clearButtonText}>Clear date</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Date Picker Modal for iOS */}
         {Platform.OS === 'ios' && (
@@ -170,7 +254,7 @@ export default function OnboardingScreen() {
 
       {/* Stroke Type */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Type of stroke (optional)</Text>
+        <Text style={styles.sectionTitle}>Type of stroke</Text>
         <View style={styles.optionsGrid}>
           {STROKE_TYPES.map((type) => (
             <TouchableOpacity
@@ -179,7 +263,7 @@ export default function OnboardingScreen() {
                 styles.optionCard,
                 strokeType === type.id && styles.optionCardActive,
               ]}
-              onPress={() => setStrokeType(type.id)}
+              onPress={() => setStrokeType(strokeType === type.id ? null : type.id)}
             >
               <Text
                 style={[
@@ -197,7 +281,7 @@ export default function OnboardingScreen() {
 
       {/* Affected Side */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Affected side (optional)</Text>
+        <Text style={styles.sectionTitle}>Affected side</Text>
         <View style={styles.optionsRow}>
           {AFFECTED_SIDES.map((side) => (
             <TouchableOpacity
@@ -206,7 +290,7 @@ export default function OnboardingScreen() {
                 styles.sideButton,
                 affectedSide === side.id && styles.sideButtonActive,
               ]}
-              onPress={() => setAffectedSide(side.id)}
+              onPress={() => setAffectedSide(affectedSide === side.id ? null : side.id)}
             >
               <Text
                 style={[
@@ -223,7 +307,7 @@ export default function OnboardingScreen() {
 
       {/* Current Therapies */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Current therapies (optional)</Text>
+        <Text style={styles.sectionTitle}>Current therapies</Text>
         <View style={styles.therapyList}>
           {THERAPIES.map((therapy) => (
             <TouchableOpacity
@@ -250,26 +334,26 @@ export default function OnboardingScreen() {
         </View>
       </View>
 
-      {/* Complete Button */}
+      {/* Save Button */}
       <TouchableOpacity
-        style={styles.completeButton}
-        onPress={handleComplete}
+        style={styles.saveButton}
+        onPress={handleSave}
         disabled={isLoading}
       >
         {isLoading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.completeButtonText}>Complete Setup</Text>
+          <Text style={styles.saveButtonText}>Save Changes</Text>
         )}
       </TouchableOpacity>
 
-      {/* Skip */}
+      {/* Cancel Button */}
       <TouchableOpacity
-        style={styles.skipButton}
-        onPress={handleComplete}
+        style={styles.cancelButton}
+        onPress={() => router.back()}
         disabled={isLoading}
       >
-        <Text style={styles.skipButtonText}>Skip for now</Text>
+        <Text style={styles.cancelButtonText}>Cancel</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -285,18 +369,31 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 40,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: Colors.gray[500],
+  },
   header: {
     marginBottom: 32,
+  },
+  backButton: {
+    marginBottom: 16,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: Colors.primary[600],
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: Colors.gray[900],
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.gray[500],
   },
   section: {
     marginBottom: 28,
@@ -337,6 +434,14 @@ const styles = StyleSheet.create({
   },
   dateIcon: {
     fontSize: 20,
+  },
+  clearButton: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  clearButtonText: {
+    fontSize: 14,
+    color: Colors.error,
   },
   modalOverlay: {
     flex: 1,
@@ -456,24 +561,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.gray[700],
   },
-  completeButton: {
+  saveButton: {
     backgroundColor: Colors.accent[500],
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 16,
   },
-  completeButtonText: {
+  saveButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
-  skipButton: {
+  cancelButton: {
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 8,
   },
-  skipButtonText: {
+  cancelButtonText: {
     color: Colors.gray[500],
     fontSize: 16,
   },

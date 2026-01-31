@@ -9,6 +9,7 @@ export default function AuthLayout() {
         contentStyle: { backgroundColor: Colors.background },
       }}
     >
+      <Stack.Screen name="onboarding-slides" />
       <Stack.Screen name="welcome" />
     </Stack>
   );

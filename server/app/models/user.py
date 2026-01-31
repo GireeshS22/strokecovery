@@ -13,6 +13,7 @@ class User(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(255), nullable=True)  # User's display name
     password_hash = Column(String(255), nullable=True)  # Nullable for Google auth
     auth_provider = Column(String(20), default="email")  # "email" or "google"
     role = Column(String(20), default="patient")  # "patient" or "caregiver"

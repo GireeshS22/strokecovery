@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import hash_password, verify_password, create_access_token, decode_access_token
 from app.models.user import User
-from app.schemas.user import UserCreate, UserLogin, UserResponse, Token
+from app.schemas.user import UserCreate, UserLogin, UserResponse, UserUpdate, Token
 
 router = APIRouter()
 
@@ -29,6 +29,7 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     # Create new user
     new_user = User(
         email=user_data.email,
+        name=user_data.name,
         password_hash=hash_password(user_data.password),
         role=user_data.role,
         auth_provider="email"
@@ -102,5 +103,39 @@ def get_current_user(token: str, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
+
+    return UserResponse.model_validate(user)
+
+
+@router.put("/me", response_model=UserResponse)
+def update_current_user(user_data: UserUpdate, token: str, db: Session = Depends(get_db)):
+    """
+    Update current user's info.
+
+    Pass token as query parameter: /api/auth/me?token=xxx
+    """
+    payload = decode_access_token(token)
+
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token"
+        )
+
+    user_id = payload.get("sub")
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Update fields if provided
+    if user_data.name is not None:
+        user.name = user_data.name
+
+    db.commit()
+    db.refresh(user)
 
     return UserResponse.model_validate(user)

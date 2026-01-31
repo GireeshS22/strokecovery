@@ -21,8 +21,9 @@ class PatientProfile(Base):
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationship to user
+    # Relationships
     user = relationship("User", back_populates="profile")
+    medicines = relationship("Medicine", back_populates="patient", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<PatientProfile user_id={self.user_id}>"

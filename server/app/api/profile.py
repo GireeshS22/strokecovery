@@ -69,6 +69,46 @@ def check_profile(token: str, db: Session = Depends(get_db)):
     }
 
 
+@router.put("/", response_model=PatientProfileResponse)
+def update_profile(
+    profile_data: PatientProfileCreate,
+    token: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Update user's profile.
+
+    - **stroke_date**: When the stroke occurred
+    - **stroke_type**: "ischemic", "hemorrhagic", or "tbi"
+    - **affected_side**: "left", "right", or "both"
+    - **current_therapies**: List like ["PT", "OT", "Speech"]
+    """
+    user = get_user_from_token(token, db)
+
+    profile = db.query(PatientProfile).filter(PatientProfile.user_id == user.id).first()
+
+    if not profile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found. Complete onboarding first."
+        )
+
+    # Update fields if provided
+    if profile_data.stroke_date is not None:
+        profile.stroke_date = profile_data.stroke_date
+    if profile_data.stroke_type is not None:
+        profile.stroke_type = profile_data.stroke_type
+    if profile_data.affected_side is not None:
+        profile.affected_side = profile_data.affected_side
+    if profile_data.current_therapies is not None:
+        profile.current_therapies = profile_data.current_therapies
+
+    db.commit()
+    db.refresh(profile)
+
+    return PatientProfileResponse.model_validate(profile)
+
+
 @router.post("/onboarding", response_model=PatientProfileResponse, status_code=status.HTTP_201_CREATED)
 def complete_onboarding(
     profile_data: PatientProfileCreate,
