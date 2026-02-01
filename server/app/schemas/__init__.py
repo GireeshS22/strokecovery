@@ -10,6 +10,14 @@ from .medicine import (
     MedicineTodayItem,
     MedicineTodayResponse,
 )
+from .therapy_session import (
+    TherapySessionCreate,
+    TherapySessionUpdate,
+    TherapySessionResponse,
+    CalendarDayItem,
+    CalendarMonthResponse,
+    TherapyStatsResponse,
+)
 
 __all__ = [
     "UserCreate",
@@ -26,4 +34,10 @@ __all__ = [
     "MedicineLogResponse",
     "MedicineTodayItem",
     "MedicineTodayResponse",
+    "TherapySessionCreate",
+    "TherapySessionUpdate",
+    "TherapySessionResponse",
+    "CalendarDayItem",
+    "CalendarMonthResponse",
+    "TherapyStatsResponse",
 ]

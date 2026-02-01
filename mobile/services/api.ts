@@ -242,3 +242,102 @@ export const medicinesApi = {
   getLogs: (medicineId: string, limit: number = 30) =>
     request<MedicineLog[]>(`/api/medicines/${medicineId}/logs?limit=${limit}`),
 };
+
+// Therapy types
+export interface TherapySession {
+  id: string;
+  patient_id: string;
+  therapy_type: 'PT' | 'OT' | 'Speech' | 'Other';
+  session_date: string;
+  session_time: string | null;
+  duration_minutes: number;
+  notes: string | null;
+  feeling_rating: number; // 1-5
+  feeling_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CalendarDayItem {
+  date: string;
+  sessions: TherapySession[];
+  session_count: number;
+  therapy_types: string[];
+}
+
+export interface CalendarMonthResponse {
+  year: number;
+  month: number;
+  days: CalendarDayItem[];
+}
+
+export interface TherapyStats {
+  total_sessions: number;
+  total_minutes: number;
+  sessions_by_type: Record<string, number>;
+  average_feeling: number;
+  this_week_sessions: number;
+  this_month_sessions: number;
+}
+
+// Therapy API
+export const therapyApi = {
+  listSessions: (params?: {
+    therapy_type?: string;
+    start_date?: string;
+    end_date?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.therapy_type) searchParams.append('therapy_type', params.therapy_type);
+    if (params?.start_date) searchParams.append('start_date', params.start_date);
+    if (params?.end_date) searchParams.append('end_date', params.end_date);
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.offset) searchParams.append('offset', params.offset.toString());
+    const query = searchParams.toString();
+    return request<TherapySession[]>(`/api/therapy/sessions${query ? `?${query}` : ''}`);
+  },
+
+  getSession: (id: string) =>
+    request<TherapySession>(`/api/therapy/sessions/${id}`),
+
+  createSession: (data: {
+    therapy_type: string;
+    session_date: string;
+    session_time?: string;
+    duration_minutes: number;
+    notes?: string;
+    feeling_rating: number;
+    feeling_notes?: string;
+  }) =>
+    request<TherapySession>('/api/therapy/sessions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateSession: (id: string, data: {
+    therapy_type?: string;
+    session_date?: string;
+    session_time?: string;
+    duration_minutes?: number;
+    notes?: string;
+    feeling_rating?: number;
+    feeling_notes?: string;
+  }) =>
+    request<TherapySession>(`/api/therapy/sessions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteSession: (id: string) =>
+    request<void>(`/api/therapy/sessions/${id}`, {
+      method: 'DELETE',
+    }),
+
+  getCalendarMonth: (year: number, month: number) =>
+    request<CalendarMonthResponse>(`/api/therapy/calendar/${year}/${month}`),
+
+  getStats: () =>
+    request<TherapyStats>('/api/therapy/stats'),
+};
