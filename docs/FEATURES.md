@@ -1,5 +1,17 @@
 # Strokecovery - Feature List
 
+## Current Progress
+
+| Phase | Status | Completed |
+|-------|--------|-----------|
+| Phase 1 | **COMPLETE** | 4/4 features |
+| Phase 2 | In Progress | 2/4 features |
+| Phase 3 | Not Started | 0/4 features |
+| Phase 4 | Not Started | 0/5 features |
+| Phase 5 | Not Started | 0/4 features |
+
+---
+
 ## Feature Phases Overview
 
 | Phase | Focus | Tech Difficulty | Data Challenge |
@@ -12,16 +24,16 @@
 
 ---
 
-## Phase 1: MVP (Launch Release)
+## Phase 1: MVP (Launch Release) - COMPLETE
 
 *Core value — enough to be useful on day one*
 
-| # | Feature | Description | Data Needed | Difficulty |
-|---|---------|-------------|-------------|------------|
-| 1.1 | **User Onboarding** | Sign up, profile setup (stroke date, affected side, current therapies) | User schema, therapy type list | Easy |
-| 1.2 | **Medicine Reminder** | Add medicines with dosage, set reminder times, push notifications | Medicine list (user input or API), notification schedules | Medium |
-| 1.3 | **Therapy Calendar** | Log PT/OT/Speech sessions, view weekly/monthly calendar | Event schema, therapy categories | Easy |
-| 1.4 | **Basic Accessibility** | Large text toggle, high contrast mode, simple navigation | None — UI config only | Easy |
+| # | Feature | Description | Status |
+|---|---------|-------------|--------|
+| 1.1 | **User Onboarding** | Sign up, profile setup (stroke date, affected side, current therapies) | Done |
+| 1.2 | **Medicine Reminder** | Add medicines with dosage, set reminder times, push notifications | Done |
+| 1.3 | **Therapy Calendar** | Log PT/OT/Speech sessions, view weekly/monthly calendar | Done |
+| 1.4 | **Basic Accessibility** | Large text toggle, high contrast mode, simple navigation | Done |
 
 ### MVP Technical Notes
 
@@ -37,16 +49,16 @@
 
 ---
 
-## Phase 2: Engagement & Tracking
+## Phase 2: Engagement & Tracking - IN PROGRESS
 
 *Keep users coming back daily*
 
-| # | Feature | Description | Data Needed | Difficulty |
-|---|---------|-------------|-------------|------------|
-| 2.1 | **Daily Stroke Bites** | Swipeable cards with facts, tips, encouragement (Instagram stories style) | 100+ stroke facts/tips content | Easy (tech) / Medium (content) |
-| 2.2 | **Ailment Journal** | Log symptoms (pain, fatigue, dizziness) with date, location, severity | Symptom categories list, severity scale | Easy |
-| 2.3 | **Mood Tracker** | Daily mood check-in with emoji scale, weekly/monthly trends view | Mood scale (5 levels), chart library | Easy |
-| 2.4 | **Streaks & Milestones** | Visual celebrations for consistency (7-day streak, 100 days since stroke) | Milestone definitions | Easy |
+| # | Feature | Description | Status |
+|---|---------|-------------|--------|
+| 2.1 | **Daily Stroke Bites** | Swipeable cards with facts, tips, encouragement (Instagram stories style) | Pending |
+| 2.2 | **Ailment Journal** | Log symptoms (pain, fatigue, dizziness) with date, location, severity | Done |
+| 2.3 | **Mood Tracker** | Daily mood check-in with emoji scale, weekly/monthly trends view | Done |
+| 2.4 | **Streaks & Milestones** | Visual celebrations for consistency (7-day streak, 100 days since stroke) | Pending |
 
 ### Phase 2 Technical Notes
 
@@ -151,11 +163,11 @@ IMPACT
 
 ## Recommended Build Order
 
-1. Auth + Medicine Reminder (validate push notifications)
-2. Therapy Calendar (core tracking loop)
-3. Basic Accessibility (essential for target users)
-4. Daily Stroke Bites (engagement hook)
-5. Ailment + Mood tracking (complete journaling)
+1. ~~Auth + Medicine Reminder (validate push notifications)~~ **DONE**
+2. ~~Therapy Calendar (core tracking loop)~~ **DONE**
+3. ~~Basic Accessibility (essential for target users)~~ **DONE**
+4. Daily Stroke Bites (engagement hook) - **NEXT**
+5. ~~Ailment + Mood tracking (complete journaling)~~ **DONE**
 6. Streaks & Milestones (retention)
 7. Community features (longer runway, moderation needed)
 8. Advanced features (differentiation)
