@@ -12,7 +12,7 @@ import {
   Modal,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Colors } from '../constants/colors';
 import { therapyApi } from '../services/api';
 
@@ -37,8 +37,18 @@ const FEELING_OPTIONS = [
 ];
 
 export default function AddSessionScreen() {
+  const { date } = useLocalSearchParams<{ date?: string }>();
+
   const [therapyType, setTherapyType] = useState<string>('PT');
-  const [sessionDate, setSessionDate] = useState(new Date());
+  const [sessionDate, setSessionDate] = useState(() => {
+    if (date) {
+      const parsed = new Date(date);
+      if (!isNaN(parsed.getTime())) {
+        return parsed;
+      }
+    }
+    return new Date();
+  });
   const [sessionTime, setSessionTime] = useState<Date | null>(null);
   const [includeTime, setIncludeTime] = useState(false);
   const [duration, setDuration] = useState(45);

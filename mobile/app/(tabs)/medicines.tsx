@@ -10,7 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { Colors } from '../../constants/colors';
+import { Colors, HighContrastColors } from '../../constants/colors';
+import { useAccessibility } from '../../contexts/AccessibilityContext';
 import { medicinesApi, Medicine, MedicineTodayResponse } from '../../services/api';
 
 const TIMING_LABELS: Record<string, string> = {
@@ -21,6 +22,9 @@ const TIMING_LABELS: Record<string, string> = {
 };
 
 export default function MedicinesScreen() {
+  const { highContrast, fontScale } = useAccessibility();
+  const colors = highContrast ? HighContrastColors : Colors;
+
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [todaySchedule, setTodaySchedule] = useState<MedicineTodayResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,9 +85,9 @@ export default function MedicinesScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primary[600]} />
-        <Text style={styles.loadingText}>Loading medicines...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.surface }]}>
+        <ActivityIndicator size="large" color={colors.primary[600]} />
+        <Text style={[styles.loadingText, { color: colors.gray[500], fontSize: 16 * fontScale }]}>Loading medicines...</Text>
       </View>
     );
   }
@@ -95,7 +99,7 @@ export default function MedicinesScreen() {
   const pendingReminders = allReminders.filter((r) => r.status === 'pending');
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.surface }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
@@ -104,22 +108,22 @@ export default function MedicinesScreen() {
       >
         {/* Today's Reminders */}
         {hasPendingToday && (
-          <View style={styles.todaySection}>
-            <Text style={styles.sectionTitle}>Due Now</Text>
+          <View style={[styles.todaySection, { backgroundColor: colors.background }]}>
+            <Text style={[styles.sectionTitle, { color: colors.gray[800], fontSize: 18 * fontScale }]}>Due Now</Text>
             {pendingReminders.map((item, index) => (
-              <View key={`${item.medicine_id}-${item.time_of_day}-${index}`} style={styles.reminderCard}>
+              <View key={`${item.medicine_id}-${item.time_of_day}-${index}`} style={[styles.reminderCard, { backgroundColor: colors.primary[50], borderLeftColor: colors.primary[600] }]}>
                 <View style={styles.reminderInfo}>
-                  <Text style={styles.reminderName}>{item.medicine_name}</Text>
-                  <Text style={styles.reminderDetails}>
+                  <Text style={[styles.reminderName, { color: colors.gray[900], fontSize: 16 * fontScale }]}>{item.medicine_name}</Text>
+                  <Text style={[styles.reminderDetails, { color: colors.gray[600], fontSize: 14 * fontScale }]}>
                     {item.dosage && `${item.dosage} • `}
                     {item.time_of_day.charAt(0).toUpperCase() + item.time_of_day.slice(1)} • {TIMING_LABELS[item.timing]}
                   </Text>
                 </View>
                 <TouchableOpacity
-                  style={styles.takeButton}
+                  style={[styles.takeButton, { backgroundColor: colors.success }]}
                   onPress={() => handleMarkTaken(item)}
                 >
-                  <Text style={styles.takeButtonText}>Take</Text>
+                  <Text style={[styles.takeButtonText, { fontSize: 14 * fontScale }]}>Take</Text>
                 </TouchableOpacity>
               </View>
             ))}
@@ -129,30 +133,30 @@ export default function MedicinesScreen() {
         {/* Today's Summary */}
         {todaySchedule && allReminders.length > 0 && (
           <View style={styles.summaryRow}>
-            <View style={[styles.summaryItem, styles.summaryTaken]}>
-              <Text style={styles.summaryNumber}>{todaySchedule.total_taken}</Text>
-              <Text style={styles.summaryLabel}>Taken</Text>
+            <View style={[styles.summaryItem, styles.summaryTaken, { backgroundColor: colors.success + '20' }]}>
+              <Text style={[styles.summaryNumber, { color: colors.gray[800], fontSize: 24 * fontScale }]}>{todaySchedule.total_taken}</Text>
+              <Text style={[styles.summaryLabel, { color: colors.gray[600], fontSize: 12 * fontScale }]}>Taken</Text>
             </View>
-            <View style={[styles.summaryItem, styles.summaryPending]}>
-              <Text style={styles.summaryNumber}>{todaySchedule.total_pending}</Text>
-              <Text style={styles.summaryLabel}>Pending</Text>
+            <View style={[styles.summaryItem, styles.summaryPending, { backgroundColor: colors.warning + '20' }]}>
+              <Text style={[styles.summaryNumber, { color: colors.gray[800], fontSize: 24 * fontScale }]}>{todaySchedule.total_pending}</Text>
+              <Text style={[styles.summaryLabel, { color: colors.gray[600], fontSize: 12 * fontScale }]}>Pending</Text>
             </View>
-            <View style={[styles.summaryItem, styles.summaryMissed]}>
-              <Text style={styles.summaryNumber}>{todaySchedule.total_missed}</Text>
-              <Text style={styles.summaryLabel}>Missed</Text>
+            <View style={[styles.summaryItem, styles.summaryMissed, { backgroundColor: colors.error + '20' }]}>
+              <Text style={[styles.summaryNumber, { color: colors.gray[800], fontSize: 24 * fontScale }]}>{todaySchedule.total_missed}</Text>
+              <Text style={[styles.summaryLabel, { color: colors.gray[600], fontSize: 12 * fontScale }]}>Missed</Text>
             </View>
           </View>
         )}
 
         {/* Medicine List */}
-        <View style={styles.listSection}>
-          <Text style={styles.sectionTitle}>My Medicines</Text>
+        <View style={[styles.listSection, { backgroundColor: colors.background }]}>
+          <Text style={[styles.sectionTitle, { color: colors.gray[800], fontSize: 18 * fontScale }]}>My Medicines</Text>
 
           {medicines.length === 0 ? (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>💊</Text>
-              <Text style={styles.emptyTitle}>No medicines yet</Text>
-              <Text style={styles.emptySubtitle}>
+              <Text style={[styles.emptyIcon, { fontSize: 48 * fontScale }]}>💊</Text>
+              <Text style={[styles.emptyTitle, { color: colors.gray[700], fontSize: 18 * fontScale }]}>No medicines yet</Text>
+              <Text style={[styles.emptySubtitle, { color: colors.gray[500], fontSize: 14 * fontScale }]}>
                 Add your medications to get reminders
               </Text>
             </View>
@@ -162,29 +166,29 @@ export default function MedicinesScreen() {
               return (
                 <TouchableOpacity
                   key={medicine.id}
-                  style={styles.medicineCard}
+                  style={[styles.medicineCard, { backgroundColor: colors.gray[50] }]}
                   onPress={() => router.push(`/edit-medicine?id=${medicine.id}`)}
                 >
-                  <View style={styles.medicineIcon}>
-                    <Text style={styles.medicineEmoji}>💊</Text>
+                  <View style={[styles.medicineIcon, { backgroundColor: colors.primary[100] }]}>
+                    <Text style={[styles.medicineEmoji, { fontSize: 24 * fontScale }]}>💊</Text>
                   </View>
                   <View style={styles.medicineInfo}>
-                    <Text style={styles.medicineName}>{medicine.name}</Text>
+                    <Text style={[styles.medicineName, { color: colors.gray[900], fontSize: 16 * fontScale }]}>{medicine.name}</Text>
                     {medicine.dosage && (
-                      <Text style={styles.medicineDosage}>{medicine.dosage}</Text>
+                      <Text style={[styles.medicineDosage, { color: colors.gray[700], fontSize: 14 * fontScale }]}>{medicine.dosage}</Text>
                     )}
-                    <Text style={styles.medicineSchedule}>
+                    <Text style={[styles.medicineSchedule, { color: colors.gray[500], fontSize: 13 * fontScale }]}>
                       {getScheduleText(medicine)} • {TIMING_LABELS[medicine.timing]}
                     </Text>
                     {daysRemaining !== null && daysRemaining <= 7 && (
-                      <View style={styles.endingBadge}>
-                        <Text style={styles.endingBadgeText}>
+                      <View style={[styles.endingBadge, { backgroundColor: colors.warning + '30' }]}>
+                        <Text style={[styles.endingBadgeText, { color: colors.warning, fontSize: 12 * fontScale }]}>
                           {daysRemaining <= 0 ? 'Ended' : `Ends in ${daysRemaining} day${daysRemaining === 1 ? '' : 's'}`}
                         </Text>
                       </View>
                     )}
                   </View>
-                  <Text style={styles.chevron}>›</Text>
+                  <Text style={[styles.chevron, { color: colors.gray[400], fontSize: 24 * fontScale }]}>›</Text>
                 </TouchableOpacity>
               );
             })
@@ -194,10 +198,10 @@ export default function MedicinesScreen() {
 
       {/* FAB - Add Medicine */}
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.accent[500] }]}
         onPress={() => router.push('/add-medicine')}
       >
-        <Text style={styles.fabText}>+</Text>
+        <Text style={[styles.fabText, { fontSize: 32 * fontScale }]}>+</Text>
       </TouchableOpacity>
     </View>
   );

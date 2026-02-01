@@ -25,6 +25,8 @@ class PatientProfile(Base):
     user = relationship("User", back_populates="profile")
     medicines = relationship("Medicine", back_populates="patient", cascade="all, delete-orphan")
     therapy_sessions = relationship("TherapySession", back_populates="patient", cascade="all, delete-orphan")
+    mood_entries = relationship("MoodEntry", back_populates="patient", cascade="all, delete-orphan")
+    ailment_entries = relationship("AilmentEntry", back_populates="patient", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<PatientProfile user_id={self.user_id}>"

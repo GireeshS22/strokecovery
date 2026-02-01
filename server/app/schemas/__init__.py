@@ -18,6 +18,16 @@ from .therapy_session import (
     CalendarMonthResponse,
     TherapyStatsResponse,
 )
+from .mood_entry import (
+    MoodEntryCreate,
+    MoodEntryUpdate,
+    MoodEntryResponse,
+)
+from .ailment_entry import (
+    AilmentEntryCreate,
+    AilmentEntryUpdate,
+    AilmentEntryResponse,
+)
 
 __all__ = [
     "UserCreate",
@@ -40,4 +50,10 @@ __all__ = [
     "CalendarDayItem",
     "CalendarMonthResponse",
     "TherapyStatsResponse",
+    "MoodEntryCreate",
+    "MoodEntryUpdate",
+    "MoodEntryResponse",
+    "AilmentEntryCreate",
+    "AilmentEntryUpdate",
+    "AilmentEntryResponse",
 ]

@@ -341,3 +341,197 @@ export const therapyApi = {
   getStats: () =>
     request<TherapyStats>('/api/therapy/stats'),
 };
+
+// Mood types
+export interface MoodEntry {
+  id: string;
+  patient_id: string;
+  entry_date: string;
+  mood_level: number; // 1-5
+  notes: string | null;
+  created_at: string;
+  mood_emoji: string;
+  mood_label: string;
+}
+
+// Mood API
+export const moodApi = {
+  create: (data: {
+    entry_date: string;
+    mood_level: number;
+    notes?: string;
+  }) =>
+    request<MoodEntry>('/api/mood', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  list: (params?: {
+    start_date?: string;
+    end_date?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.start_date) searchParams.append('start_date', params.start_date);
+    if (params?.end_date) searchParams.append('end_date', params.end_date);
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.offset) searchParams.append('offset', params.offset.toString());
+    const query = searchParams.toString();
+    return request<MoodEntry[]>(`/api/mood${query ? `?${query}` : ''}`);
+  },
+
+  get: (id: string) =>
+    request<MoodEntry>(`/api/mood/${id}`),
+
+  update: (id: string, data: {
+    entry_date?: string;
+    mood_level?: number;
+    notes?: string;
+  }) =>
+    request<MoodEntry>(`/api/mood/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    request<void>(`/api/mood/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
+// Ailment types
+export interface AilmentEntry {
+  id: string;
+  patient_id: string;
+  entry_date: string;
+  symptom: string;
+  body_location: string | null;
+  severity: number; // 1-10
+  notes: string | null;
+  created_at: string;
+  severity_label: string;
+  severity_color: string;
+}
+
+// Ailment API
+export const ailmentApi = {
+  create: (data: {
+    entry_date: string;
+    symptom: string;
+    body_location?: string;
+    severity: number;
+    notes?: string;
+  }) =>
+    request<AilmentEntry>('/api/ailments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  list: (params?: {
+    start_date?: string;
+    end_date?: string;
+    symptom?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.start_date) searchParams.append('start_date', params.start_date);
+    if (params?.end_date) searchParams.append('end_date', params.end_date);
+    if (params?.symptom) searchParams.append('symptom', params.symptom);
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.offset) searchParams.append('offset', params.offset.toString());
+    const query = searchParams.toString();
+    return request<AilmentEntry[]>(`/api/ailments${query ? `?${query}` : ''}`);
+  },
+
+  get: (id: string) =>
+    request<AilmentEntry>(`/api/ailments/${id}`),
+
+  update: (id: string, data: {
+    entry_date?: string;
+    symptom?: string;
+    body_location?: string;
+    severity?: number;
+    notes?: string;
+  }) =>
+    request<AilmentEntry>(`/api/ailments/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  delete: (id: string) =>
+    request<void>(`/api/ailments/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
+// Calendar types
+export interface CalendarMedicineItem {
+  id: string;
+  name: string;
+  dosage: string | null;
+  status: string;
+  time_of_day: string;
+  taken_at: string | null;
+}
+
+export interface CalendarTherapyItem {
+  id: string;
+  type: string;
+  duration: number;
+  feeling: number;
+  feeling_emoji: string;
+  notes: string | null;
+}
+
+export interface CalendarMoodItem {
+  id: string;
+  level: number;
+  emoji: string;
+  label: string;
+  notes: string | null;
+}
+
+export interface CalendarAilmentItem {
+  id: string;
+  symptom: string;
+  body_location: string | null;
+  severity: number;
+  severity_label: string;
+  notes: string | null;
+}
+
+export interface CalendarDayEntries {
+  medicines: CalendarMedicineItem[];
+  therapy: CalendarTherapyItem[];
+  mood: CalendarMoodItem | null;
+  ailments: CalendarAilmentItem[];
+}
+
+export interface CalendarSummary {
+  medicine_count: number;
+  therapy_count: number;
+  mood_count: number;
+  ailment_count: number;
+  days_with_entries: number;
+}
+
+export interface CalendarResponse {
+  entries: Record<string, CalendarDayEntries>;
+  summary: CalendarSummary;
+}
+
+export interface DayEntriesResponse {
+  date: string;
+  entries: CalendarDayEntries;
+}
+
+// Calendar API
+export const calendarApi = {
+  getRange: (startDate: string, endDate: string) =>
+    request<CalendarResponse>(`/api/calendar?start_date=${startDate}&end_date=${endDate}`),
+
+  getDay: (date: string) =>
+    request<DayEntriesResponse>(`/api/calendar/${date}`),
+};

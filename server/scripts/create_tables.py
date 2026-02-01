@@ -122,7 +122,7 @@ def create_tables():
         print("    [OK] medicine_logs table created")
 
         # 5. Create therapy_sessions table
-        print("\n[5/11] Creating therapy_sessions table...")
+        print("\n[5/13] Creating therapy_sessions table...")
         conn.execute(text("""
             CREATE TABLE IF NOT EXISTS therapy_sessions (
                 id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -147,30 +147,81 @@ def create_tables():
         """))
         print("    [OK] therapy_sessions table created")
 
-        # 6. Enable RLS on users
-        print("\n[6/11] Enabling Row Level Security on users...")
+        # 6. Create mood_entries table
+        print("\n[6/13] Creating mood_entries table...")
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS mood_entries (
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                patient_id UUID NOT NULL REFERENCES patient_profiles(id) ON DELETE CASCADE,
+                entry_date DATE NOT NULL,
+                mood_level INTEGER NOT NULL,
+                notes TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                UNIQUE(patient_id, entry_date)
+            );
+        """))
+        # Create indexes for faster lookups
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_mood_entries_patient_id ON mood_entries(patient_id);
+        """))
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_mood_entries_entry_date ON mood_entries(entry_date);
+        """))
+        print("    [OK] mood_entries table created")
+
+        # 7. Create ailment_entries table
+        print("\n[7/13] Creating ailment_entries table...")
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS ailment_entries (
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                patient_id UUID NOT NULL REFERENCES patient_profiles(id) ON DELETE CASCADE,
+                entry_date DATE NOT NULL,
+                symptom VARCHAR(50) NOT NULL,
+                body_location VARCHAR(50),
+                severity INTEGER NOT NULL,
+                notes TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+        """))
+        # Create indexes for faster lookups
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_ailment_entries_patient_id ON ailment_entries(patient_id);
+        """))
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_ailment_entries_entry_date ON ailment_entries(entry_date);
+        """))
+        print("    [OK] ailment_entries table created")
+
+        # 8. Enable RLS on users
+        print("\n[8/13] Enabling Row Level Security on users...")
         conn.execute(text("ALTER TABLE users ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on users")
 
-        # 7. Enable RLS on patient_profiles
-        print("\n[7/11] Enabling Row Level Security on patient_profiles...")
+        # 9. Enable RLS on patient_profiles
+        print("\n[9/13] Enabling Row Level Security on patient_profiles...")
         conn.execute(text("ALTER TABLE patient_profiles ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on patient_profiles")
 
-        # 8. Enable RLS on medicines
-        print("\n[8/11] Enabling Row Level Security on medicines...")
+        # 10. Enable RLS on medicines
+        print("\n[10/13] Enabling Row Level Security on medicines...")
         conn.execute(text("ALTER TABLE medicines ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on medicines")
 
-        # 9. Enable RLS on medicine_logs
-        print("\n[9/11] Enabling Row Level Security on medicine_logs...")
+        # 11. Enable RLS on medicine_logs
+        print("\n[11/13] Enabling Row Level Security on medicine_logs...")
         conn.execute(text("ALTER TABLE medicine_logs ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on medicine_logs")
 
-        # 10. Enable RLS on therapy_sessions
-        print("\n[10/11] Enabling Row Level Security on therapy_sessions...")
+        # 12. Enable RLS on therapy_sessions
+        print("\n[12/13] Enabling Row Level Security on therapy_sessions...")
         conn.execute(text("ALTER TABLE therapy_sessions ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on therapy_sessions")
+
+        # 13. Enable RLS on mood_entries and ailment_entries
+        print("\n[13/13] Enabling Row Level Security on mood_entries and ailment_entries...")
+        conn.execute(text("ALTER TABLE mood_entries ENABLE ROW LEVEL SECURITY;"))
+        conn.execute(text("ALTER TABLE ailment_entries ENABLE ROW LEVEL SECURITY;"))
+        print("    [OK] RLS enabled on mood_entries and ailment_entries")
 
         conn.execute(text("""
             DO $$
@@ -249,6 +300,28 @@ def create_tables():
                         USING (true)
                         WITH CHECK (true);
                 END IF;
+
+                -- Allow service role full access to mood_entries
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_policies
+                    WHERE tablename = 'mood_entries' AND policyname = 'Service role full access'
+                ) THEN
+                    CREATE POLICY "Service role full access" ON mood_entries
+                        FOR ALL TO service_role
+                        USING (true)
+                        WITH CHECK (true);
+                END IF;
+
+                -- Allow service role full access to ailment_entries
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_policies
+                    WHERE tablename = 'ailment_entries' AND policyname = 'Service role full access'
+                ) THEN
+                    CREATE POLICY "Service role full access" ON ailment_entries
+                        FOR ALL TO service_role
+                        USING (true)
+                        WITH CHECK (true);
+                END IF;
             END
             $$;
         """))
@@ -263,7 +336,7 @@ def create_tables():
             SELECT table_name
             FROM information_schema.tables
             WHERE table_schema = 'public'
-            AND table_name IN ('users', 'patient_profiles', 'medicines', 'medicine_logs', 'therapy_sessions')
+            AND table_name IN ('users', 'patient_profiles', 'medicines', 'medicine_logs', 'therapy_sessions', 'mood_entries', 'ailment_entries')
             ORDER BY table_name;
         """))
         tables = [row[0] for row in result]
@@ -319,6 +392,28 @@ def create_tables():
             SELECT column_name, data_type
             FROM information_schema.columns
             WHERE table_name = 'therapy_sessions'
+            ORDER BY ordinal_position;
+        """))
+        for row in result:
+            print(f"    - {row[0]}: {row[1]}")
+
+        # Show mood_entries table structure
+        print("\n[mood_entries] columns:")
+        result = conn.execute(text("""
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = 'mood_entries'
+            ORDER BY ordinal_position;
+        """))
+        for row in result:
+            print(f"    - {row[0]}: {row[1]}")
+
+        # Show ailment_entries table structure
+        print("\n[ailment_entries] columns:")
+        result = conn.execute(text("""
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = 'ailment_entries'
             ORDER BY ordinal_position;
         """))
         for row in result:

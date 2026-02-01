@@ -3,10 +3,11 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator } from 'react-native';
 import { Colors } from '../constants/colors';
+import { AccessibilityProvider } from '../contexts/AccessibilityContext';
 
 export default function RootLayout() {
   return (
-    <>
+    <AccessibilityProvider>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -19,6 +20,6 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
-    </>
+    </AccessibilityProvider>
   );
 }
