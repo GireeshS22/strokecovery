@@ -535,3 +535,60 @@ export const calendarApi = {
   getDay: (date: string) =>
     request<DayEntriesResponse>(`/api/calendar/${date}`),
 };
+
+// Game types
+export interface GameResult {
+  id: string;
+  patient_id: string;
+  game_id: string;
+  game_type: string;
+  score: number;
+  time_seconds: number | null;
+  played_at: string;
+}
+
+export interface GameStats {
+  total_games: number;
+  correct_answers: number;
+  accuracy: number;
+  games_today: number;
+  correct_today: number;
+  accuracy_today: number;
+  current_streak: number;
+  last_played_date: string | null;
+}
+
+export interface GameResultListResponse {
+  results: GameResult[];
+  total: number;
+}
+
+// Games API
+export const gamesApi = {
+  saveResult: (data: {
+    game_id: string;
+    game_type: string;
+    score: number;
+    time_seconds?: number;
+  }) =>
+    request<GameResult>('/api/games/results', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  listResults: (params?: {
+    game_type?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.game_type) searchParams.append('game_type', params.game_type);
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.offset) searchParams.append('offset', params.offset.toString());
+    const query = searchParams.toString();
+    return request<GameResultListResponse>(`/api/games/results${query ? `?${query}` : ''}`);
+  },
+
+  getStats: () =>
+    request<GameStats>('/api/games/stats'),
+};

@@ -170,7 +170,7 @@ def create_tables():
         print("    [OK] mood_entries table created")
 
         # 7. Create ailment_entries table
-        print("\n[7/13] Creating ailment_entries table...")
+        print("\n[7/14] Creating ailment_entries table...")
         conn.execute(text("""
             CREATE TABLE IF NOT EXISTS ailment_entries (
                 id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -192,36 +192,59 @@ def create_tables():
         """))
         print("    [OK] ailment_entries table created")
 
-        # 8. Enable RLS on users
-        print("\n[8/13] Enabling Row Level Security on users...")
+        # 8. Create game_results table
+        print("\n[8/14] Creating game_results table...")
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS game_results (
+                id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                patient_id UUID NOT NULL REFERENCES patient_profiles(id) ON DELETE CASCADE,
+                game_id VARCHAR(20) NOT NULL,
+                game_type VARCHAR(20) NOT NULL,
+                score INTEGER NOT NULL,
+                time_seconds INTEGER,
+                played_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+        """))
+        # Create indexes for faster lookups
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_game_results_patient_id ON game_results(patient_id);
+        """))
+        conn.execute(text("""
+            CREATE INDEX IF NOT EXISTS idx_game_results_played_at ON game_results(played_at);
+        """))
+        print("    [OK] game_results table created")
+
+        # 9. Enable RLS on users
+        print("\n[9/14] Enabling Row Level Security on users...")
         conn.execute(text("ALTER TABLE users ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on users")
 
-        # 9. Enable RLS on patient_profiles
-        print("\n[9/13] Enabling Row Level Security on patient_profiles...")
+        # 10. Enable RLS on patient_profiles
+        print("\n[10/14] Enabling Row Level Security on patient_profiles...")
         conn.execute(text("ALTER TABLE patient_profiles ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on patient_profiles")
 
-        # 10. Enable RLS on medicines
-        print("\n[10/13] Enabling Row Level Security on medicines...")
+        # 11. Enable RLS on medicines
+        print("\n[11/14] Enabling Row Level Security on medicines...")
         conn.execute(text("ALTER TABLE medicines ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on medicines")
 
-        # 11. Enable RLS on medicine_logs
-        print("\n[11/13] Enabling Row Level Security on medicine_logs...")
+        # 12. Enable RLS on medicine_logs
+        print("\n[12/14] Enabling Row Level Security on medicine_logs...")
         conn.execute(text("ALTER TABLE medicine_logs ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on medicine_logs")
 
-        # 12. Enable RLS on therapy_sessions
-        print("\n[12/13] Enabling Row Level Security on therapy_sessions...")
+        # 13. Enable RLS on therapy_sessions
+        print("\n[13/14] Enabling Row Level Security on therapy_sessions...")
         conn.execute(text("ALTER TABLE therapy_sessions ENABLE ROW LEVEL SECURITY;"))
         print("    [OK] RLS enabled on therapy_sessions")
 
-        # 13. Enable RLS on mood_entries and ailment_entries
-        print("\n[13/13] Enabling Row Level Security on mood_entries and ailment_entries...")
+        # 14. Enable RLS on mood_entries, ailment_entries, and game_results
+        print("\n[14/14] Enabling Row Level Security on mood_entries, ailment_entries, and game_results...")
         conn.execute(text("ALTER TABLE mood_entries ENABLE ROW LEVEL SECURITY;"))
         conn.execute(text("ALTER TABLE ailment_entries ENABLE ROW LEVEL SECURITY;"))
-        print("    [OK] RLS enabled on mood_entries and ailment_entries")
+        conn.execute(text("ALTER TABLE game_results ENABLE ROW LEVEL SECURITY;"))
+        print("    [OK] RLS enabled on mood_entries, ailment_entries, and game_results")
 
         conn.execute(text("""
             DO $$
@@ -322,6 +345,17 @@ def create_tables():
                         USING (true)
                         WITH CHECK (true);
                 END IF;
+
+                -- Allow service role full access to game_results
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_policies
+                    WHERE tablename = 'game_results' AND policyname = 'Service role full access'
+                ) THEN
+                    CREATE POLICY "Service role full access" ON game_results
+                        FOR ALL TO service_role
+                        USING (true)
+                        WITH CHECK (true);
+                END IF;
             END
             $$;
         """))
@@ -336,7 +370,7 @@ def create_tables():
             SELECT table_name
             FROM information_schema.tables
             WHERE table_schema = 'public'
-            AND table_name IN ('users', 'patient_profiles', 'medicines', 'medicine_logs', 'therapy_sessions', 'mood_entries', 'ailment_entries')
+            AND table_name IN ('users', 'patient_profiles', 'medicines', 'medicine_logs', 'therapy_sessions', 'mood_entries', 'ailment_entries', 'game_results')
             ORDER BY table_name;
         """))
         tables = [row[0] for row in result]
@@ -414,6 +448,17 @@ def create_tables():
             SELECT column_name, data_type
             FROM information_schema.columns
             WHERE table_name = 'ailment_entries'
+            ORDER BY ordinal_position;
+        """))
+        for row in result:
+            print(f"    - {row[0]}: {row[1]}")
+
+        # Show game_results table structure
+        print("\n[game_results] columns:")
+        result = conn.execute(text("""
+            SELECT column_name, data_type
+            FROM information_schema.columns
+            WHERE table_name = 'game_results'
             ORDER BY ordinal_position;
         """))
         for row in result:

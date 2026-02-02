@@ -1,11 +1,29 @@
+import { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { Colors, HighContrastColors } from '../../constants/colors';
 import { useAccessibility } from '../../contexts/AccessibilityContext';
+import { gamesApi, GameStats } from '../../services/api';
 
 export default function HomeScreen() {
   const { highContrast, fontScale } = useAccessibility();
   const colors = highContrast ? HighContrastColors : Colors;
+
+  const [gameStats, setGameStats] = useState<GameStats | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadStats = async () => {
+        try {
+          const stats = await gamesApi.getStats();
+          setGameStats(stats);
+        } catch (err) {
+          // Silently fail - stats are optional
+        }
+      };
+      loadStats();
+    }, [])
+  );
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.surface }]} contentContainerStyle={styles.content}>
@@ -65,6 +83,34 @@ export default function HomeScreen() {
           <Text style={[styles.actionLabel, { color: colors.gray[700], fontSize: 14 * fontScale }]}>Log Ailment</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Brain Games Section */}
+      <Text style={[styles.sectionTitle, { color: colors.gray[800], fontSize: 18 * fontScale }]}>Brain Games</Text>
+      <TouchableOpacity
+        style={[styles.gamesCard, { backgroundColor: colors.background, borderColor: colors.gray[200] }]}
+        onPress={() => router.push('/games')}
+      >
+        <View style={styles.gamesCardContent}>
+          <Text style={[styles.gamesIcon, { fontSize: 40 * fontScale }]}>🧠</Text>
+          <View style={styles.gamesCardText}>
+            <Text style={[styles.gamesTitle, { color: colors.gray[800], fontSize: 16 * fontScale }]}>
+              Word-Image Games
+            </Text>
+            <Text style={[styles.gamesSubtitle, { color: colors.gray[500], fontSize: 14 * fontScale }]}>
+              Match words with emojis to exercise your brain
+            </Text>
+          </View>
+          {gameStats && gameStats.current_streak > 0 ? (
+            <View style={styles.streakBadge}>
+              <Text style={[styles.streakBadgeText, { fontSize: 12 * fontScale }]}>
+                🔥 {gameStats.current_streak}
+              </Text>
+            </View>
+          ) : (
+            <Text style={[styles.gamesArrow, { color: colors.gray[400], fontSize: 24 * fontScale }]}>›</Text>
+          )}
+        </View>
+      </TouchableOpacity>
 
       {/* Daily Tip */}
       <View style={[styles.tipCard, { backgroundColor: colors.background, borderColor: colors.gray[200] }]}>
@@ -164,5 +210,41 @@ const styles = StyleSheet.create({
   },
   tipText: {
     lineHeight: 22,
+  },
+  gamesCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+    marginBottom: 24,
+  },
+  gamesCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  gamesIcon: {
+    marginRight: 12,
+  },
+  gamesCardText: {
+    flex: 1,
+  },
+  gamesTitle: {
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  gamesSubtitle: {
+  },
+  gamesArrow: {
+    marginLeft: 8,
+  },
+  streakBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginLeft: 8,
+  },
+  streakBadgeText: {
+    color: '#92400E',
+    fontWeight: '600',
   },
 });
