@@ -8,8 +8,28 @@ import { gamesApi } from '../services/api';
 const CIRCLE_SIZE = 70;
 const MIN_DISTANCE = 85; // Minimum distance between circle centers
 
+// Generate random numbers from each decade (1-10, 11-20, 21-30, etc.)
+function generateRandomDecadeNumbers(): number[] {
+  const numbers: number[] = [];
+  for (let decade = 0; decade < 10; decade++) {
+    const min = decade * 10 + 1; // 1, 11, 21, 31, ...
+    const max = decade * 10 + 10; // 10, 20, 30, 40, ...
+    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    numbers.push(randomNum);
+  }
+  return numbers;
+}
+
 // Game modes configuration
-const GAME_MODES = {
+interface GameModeConfig {
+  numbers?: number[];
+  generateNumbers?: () => number[];
+  title: string;
+  instruction: string;
+  gameId: string;
+}
+
+const GAME_MODES: Record<string, GameModeConfig> = {
   '1-10': {
     numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     title: 'Tap the Numbers',
@@ -21,6 +41,12 @@ const GAME_MODES = {
     title: 'Tap the Tens',
     instruction: 'Tap numbers in order: 10 → 20 → 30 → ... → 100',
     gameId: 'sequence_10',
+  },
+  'random': {
+    generateNumbers: generateRandomDecadeNumbers,
+    title: 'Random Decades',
+    instruction: 'Tap numbers in order: smallest → largest',
+    gameId: 'sequence_random',
   },
 };
 
@@ -78,6 +104,17 @@ function formatTime(seconds: number): string {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
+// Get numbers for a game mode (static or generated)
+function getNumbersForMode(config: GameModeConfig): number[] {
+  if (config.numbers) {
+    return config.numbers;
+  }
+  if (config.generateNumbers) {
+    return config.generateNumbers();
+  }
+  return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; // Fallback
+}
+
 export default function PlaySequenceScreen() {
   const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
   const { highContrast, fontScale } = useAccessibility();
@@ -86,7 +123,8 @@ export default function PlaySequenceScreen() {
   // Get game mode configuration (default to 1-10)
   const mode: GameMode = (modeParam && modeParam in GAME_MODES) ? modeParam as GameMode : '1-10';
   const gameConfig = GAME_MODES[mode];
-  const numbers = gameConfig.numbers;
+
+  const [numbers, setNumbers] = useState<number[]>(() => getNumbersForMode(gameConfig));
   const totalNumbers = numbers.length;
 
   const [positions, setPositions] = useState<CirclePosition[]>([]);
@@ -109,7 +147,7 @@ export default function PlaySequenceScreen() {
       setPositions(newPositions);
       setGameStarted(true);
     }
-  }, [gameAreaSize, gameStarted]);
+  }, [gameAreaSize, gameStarted, numbers]);
 
   // Start timer when game starts
   useEffect(() => {
@@ -173,6 +211,10 @@ export default function PlaySequenceScreen() {
   };
 
   const handlePlayAgain = () => {
+    // Generate new numbers (for random mode, this creates new random numbers)
+    const newNumbers = getNumbersForMode(gameConfig);
+    setNumbers(newNumbers);
+
     // Reset game state
     setPositions([]);
     setCurrentTargetIndex(0);
@@ -186,7 +228,7 @@ export default function PlaySequenceScreen() {
     // Regenerate positions after a brief delay
     setTimeout(() => {
       if (gameAreaSize.width > 0 && gameAreaSize.height > 0) {
-        const newPositions = generatePositions(gameAreaSize.width, gameAreaSize.height, numbers);
+        const newPositions = generatePositions(gameAreaSize.width, gameAreaSize.height, newNumbers);
         setPositions(newPositions);
         setGameStarted(true);
       }
@@ -345,7 +387,7 @@ export default function PlaySequenceScreen() {
                         : shouldHighlight
                         ? '#065F46' // Green text for hint
                         : colors.gray[700],
-                      fontSize: (mode === '10-100' ? 22 : 28) * fontScale,
+                      fontSize: (mode === '10-100' || mode === 'random' ? 22 : 28) * fontScale,
                     },
                   ]}
                 >
