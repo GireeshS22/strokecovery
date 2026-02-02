@@ -104,44 +104,83 @@ export default function GamesScreen() {
           )}
         </View>
 
-        {/* Start Session Button */}
+        {/* Games Section */}
+        <Text style={[styles.sectionTitle, { color: colors.gray[800], fontSize: 18 * fontScale }]}>
+          Choose a Game
+        </Text>
+
+        {/* Word-Image Game Button */}
         <TouchableOpacity
-          style={[styles.startButton, { backgroundColor: colors.primary[600] }]}
+          style={[styles.gameButton, { backgroundColor: colors.primary[600] }]}
           onPress={handleStartSession}
         >
-          <Text style={[styles.startButtonEmoji, { fontSize: 40 * fontScale }]}>🧠</Text>
-          <View style={styles.startButtonText}>
-            <Text style={[styles.startButtonTitle, { fontSize: 20 * fontScale }]}>
-              Start Session
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🧠</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Word-Image Match
             </Text>
-            <Text style={[styles.startButtonSubtitle, { fontSize: 14 * fontScale }]}>
-              {GAMES_PER_SESSION} randomized games
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Match emojis and words ({GAMES_PER_SESSION} rounds)
             </Text>
           </View>
-          <Text style={[styles.startButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
+        {/* Number Sequence Game Button */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#7C3AED' }]}
+          onPress={() => router.push('/play-sequence')}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🔢</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Tap the Numbers
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Tap 1-10 in order as fast as you can
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
+        {/* Alphabet Sequence Game Button */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#059669' }]}
+          onPress={() => router.push('/play-alphabet')}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🔤</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Tap the Letters
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Tap A-J in order as fast as you can
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
         </TouchableOpacity>
 
         {/* How It Works */}
         <View style={[styles.infoCard, { backgroundColor: colors.background, borderColor: colors.gray[200] }]}>
           <Text style={[styles.infoTitle, { color: colors.gray[800], fontSize: 16 * fontScale }]}>
-            How It Works
+            Why Brain Games?
           </Text>
           <View style={styles.infoItem}>
-            <Text style={[styles.infoEmoji, { fontSize: 20 * fontScale }]}>🎯</Text>
+            <Text style={[styles.infoEmoji, { fontSize: 20 * fontScale }]}>🧠</Text>
             <Text style={[styles.infoText, { color: colors.gray[600], fontSize: 14 * fontScale }]}>
-              Match emojis to words and words to emojis
+              Exercise cognitive skills and memory
             </Text>
           </View>
           <View style={styles.infoItem}>
-            <Text style={[styles.infoEmoji, { fontSize: 20 * fontScale }]}>🔟</Text>
+            <Text style={[styles.infoEmoji, { fontSize: 20 * fontScale }]}>👁️</Text>
             <Text style={[styles.infoText, { color: colors.gray[600], fontSize: 14 * fontScale }]}>
-              Each session has 10 random games
+              Improve visual scanning and attention
             </Text>
           </View>
           <View style={styles.infoItem}>
             <Text style={[styles.infoEmoji, { fontSize: 20 * fontScale }]}>📊</Text>
             <Text style={[styles.infoText, { color: colors.gray[600], fontSize: 14 * fontScale }]}>
-              See your results and track progress
+              Track your progress over time
             </Text>
           </View>
           <View style={styles.infoItem}>
@@ -153,20 +192,32 @@ export default function GamesScreen() {
         </View>
 
         {/* Game Types Preview */}
-        <Text style={[styles.sectionTitle, { color: colors.gray[800], fontSize: 16 * fontScale }]}>
+        <Text style={[styles.sectionTitle, { color: colors.gray[800], fontSize: 16 * fontScale, marginTop: 12 }]}>
           Game Types
         </Text>
-        <View style={styles.gameTypesRow}>
+        <View style={styles.gameTypesGrid}>
           <View style={[styles.gameTypeCard, { backgroundColor: colors.primary[50] }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 32 * fontScale }]}>🍎 → ?</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 12 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 22 * fontScale }]}>🍎 → ?</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 10 * fontScale }]}>
               Emoji to Word
             </Text>
           </View>
           <View style={[styles.gameTypeCard, { backgroundColor: colors.accent[50] }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 32 * fontScale }]}>Heart → ?</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 12 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 22 * fontScale }]}>Heart → ?</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 10 * fontScale }]}>
               Word to Emoji
+            </Text>
+          </View>
+          <View style={[styles.gameTypeCard, { backgroundColor: '#EDE9FE' }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 22 * fontScale }]}>1→2→3</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 10 * fontScale }]}>
+              Numbers
+            </Text>
+          </View>
+          <View style={[styles.gameTypeCard, { backgroundColor: '#D1FAE5' }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 22 * fontScale }]}>A→B→C</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 10 * fontScale }]}>
+              Letters
             </Text>
           </View>
         </View>
@@ -237,28 +288,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 10,
   },
-  startButton: {
+  gameButton: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 16,
     padding: 20,
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  startButtonEmoji: {
+  gameButtonEmoji: {
     marginRight: 16,
   },
-  startButtonText: {
+  gameButtonText: {
     flex: 1,
   },
-  startButtonTitle: {
+  gameButtonTitle: {
     fontWeight: 'bold',
     color: '#fff',
   },
-  startButtonSubtitle: {
+  gameButtonSubtitle: {
     color: 'rgba(255,255,255,0.8)',
     marginTop: 2,
   },
-  startButtonArrow: {
+  gameButtonArrow: {
     color: '#fff',
   },
   infoCard: {
@@ -286,14 +337,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 12,
   },
-  gameTypesRow: {
+  gameTypesGrid: {
     flexDirection: 'row',
-    gap: 12,
+    flexWrap: 'wrap',
+    gap: 10,
   },
   gameTypeCard: {
-    flex: 1,
+    width: '48%',
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
   },
   gameTypeEmoji: {
