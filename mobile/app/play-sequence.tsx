@@ -1,16 +1,34 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Animated } from 'react-native';
-import { Stack, router } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { gamesApi } from '../services/api';
 
-const TOTAL_NUMBERS = 10;
 const CIRCLE_SIZE = 70;
 const MIN_DISTANCE = 85; // Minimum distance between circle centers
 
+// Game modes configuration
+const GAME_MODES = {
+  '1-10': {
+    numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    title: 'Tap the Numbers',
+    instruction: 'Tap numbers in order: 1 → 2 → 3 → ... → 10',
+    gameId: 'sequence_1',
+  },
+  '10-100': {
+    numbers: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+    title: 'Tap the Tens',
+    instruction: 'Tap numbers in order: 10 → 20 → 30 → ... → 100',
+    gameId: 'sequence_10',
+  },
+};
+
+type GameMode = keyof typeof GAME_MODES;
+
 interface CirclePosition {
-  id: number;
+  id: number; // Index in the numbers array
+  value: number; // Actual number to display
   x: number;
   y: number;
 }
@@ -24,19 +42,20 @@ function checkOverlap(pos1: CirclePosition, pos2: CirclePosition, minDist: numbe
 }
 
 // Generate random non-overlapping positions
-function generatePositions(width: number, height: number): CirclePosition[] {
+function generatePositions(width: number, height: number, numbers: number[]): CirclePosition[] {
   const positions: CirclePosition[] = [];
   const padding = 20;
   const maxX = width - CIRCLE_SIZE - padding;
   const maxY = height - CIRCLE_SIZE - padding;
 
-  for (let i = 1; i <= TOTAL_NUMBERS; i++) {
+  for (let i = 0; i < numbers.length; i++) {
     let attempts = 0;
     let newPos: CirclePosition;
 
     do {
       newPos = {
-        id: i,
+        id: i, // Index in array
+        value: numbers[i], // Actual number to display
         x: padding + Math.random() * maxX,
         y: padding + Math.random() * maxY,
       };
@@ -60,12 +79,19 @@ function formatTime(seconds: number): string {
 }
 
 export default function PlaySequenceScreen() {
+  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
   const { highContrast, fontScale } = useAccessibility();
   const colors = highContrast ? HighContrastColors : Colors;
 
+  // Get game mode configuration (default to 1-10)
+  const mode: GameMode = (modeParam && modeParam in GAME_MODES) ? modeParam as GameMode : '1-10';
+  const gameConfig = GAME_MODES[mode];
+  const numbers = gameConfig.numbers;
+  const totalNumbers = numbers.length;
+
   const [positions, setPositions] = useState<CirclePosition[]>([]);
-  const [currentTarget, setCurrentTarget] = useState(1);
-  const [completedNumbers, setCompletedNumbers] = useState<number[]>([]);
+  const [currentTargetIndex, setCurrentTargetIndex] = useState(0); // Index in numbers array
+  const [completedIndices, setCompletedIndices] = useState<number[]>([]);
   const [wrongTap, setWrongTap] = useState<number | null>(null);
   const [showHint, setShowHint] = useState(false); // Only show hint after wrong tap
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -79,7 +105,7 @@ export default function PlaySequenceScreen() {
   // Initialize game when area size is known
   useEffect(() => {
     if (gameAreaSize.width > 0 && gameAreaSize.height > 0 && !gameStarted) {
-      const newPositions = generatePositions(gameAreaSize.width, gameAreaSize.height);
+      const newPositions = generatePositions(gameAreaSize.width, gameAreaSize.height, numbers);
       setPositions(newPositions);
       setGameStarted(true);
     }
@@ -101,15 +127,15 @@ export default function PlaySequenceScreen() {
   }, [gameStarted, isComplete]);
 
   // Handle circle tap
-  const handleTap = (number: number) => {
+  const handleTap = (index: number) => {
     if (isComplete) return;
 
-    if (number === currentTarget) {
+    if (index === currentTargetIndex) {
       // Correct tap
-      setCompletedNumbers(prev => [...prev, number]);
+      setCompletedIndices(prev => [...prev, index]);
       setShowHint(false); // Reset hint for next number
 
-      if (number === TOTAL_NUMBERS) {
+      if (index === totalNumbers - 1) {
         // Game complete
         setIsComplete(true);
         if (timerRef.current) {
@@ -118,11 +144,11 @@ export default function PlaySequenceScreen() {
         // Save result
         saveResult();
       } else {
-        setCurrentTarget(prev => prev + 1);
+        setCurrentTargetIndex(prev => prev + 1);
       }
     } else {
       // Wrong tap - flash red and show hint
-      setWrongTap(number);
+      setWrongTap(index);
       setShowHint(true); // Enable hint after wrong tap
       if (wrongTapTimeoutRef.current) {
         clearTimeout(wrongTapTimeoutRef.current);
@@ -136,7 +162,7 @@ export default function PlaySequenceScreen() {
   const saveResult = async () => {
     try {
       await gamesApi.saveResult({
-        game_id: 'sequence_1',
+        game_id: gameConfig.gameId,
         game_type: 'number_sequence',
         score: 1, // Completed
         time_seconds: elapsedTime,
@@ -149,8 +175,8 @@ export default function PlaySequenceScreen() {
   const handlePlayAgain = () => {
     // Reset game state
     setPositions([]);
-    setCurrentTarget(1);
-    setCompletedNumbers([]);
+    setCurrentTargetIndex(0);
+    setCompletedIndices([]);
     setWrongTap(null);
     setShowHint(false);
     setElapsedTime(0);
@@ -160,7 +186,7 @@ export default function PlaySequenceScreen() {
     // Regenerate positions after a brief delay
     setTimeout(() => {
       if (gameAreaSize.width > 0 && gameAreaSize.height > 0) {
-        const newPositions = generatePositions(gameAreaSize.width, gameAreaSize.height);
+        const newPositions = generatePositions(gameAreaSize.width, gameAreaSize.height, numbers);
         setPositions(newPositions);
         setGameStarted(true);
       }
@@ -229,7 +255,7 @@ export default function PlaySequenceScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'Tap the Numbers',
+          title: gameConfig.title,
           headerStyle: { backgroundColor: colors.primary[600] },
           headerTintColor: '#fff',
         }}
@@ -243,7 +269,7 @@ export default function PlaySequenceScreen() {
             </Text>
             <View style={[styles.nextBadge, { backgroundColor: colors.primary[100] }]}>
               <Text style={[styles.nextNumber, { color: colors.primary[700], fontSize: 24 * fontScale }]}>
-                {currentTarget}
+                {numbers[currentTargetIndex]}
               </Text>
             </View>
           </View>
@@ -262,7 +288,7 @@ export default function PlaySequenceScreen() {
               styles.progressBar,
               {
                 backgroundColor: colors.primary[600],
-                width: `${(completedNumbers.length / TOTAL_NUMBERS) * 100}%`,
+                width: `${(completedIndices.length / totalNumbers) * 100}%`,
               },
             ]}
           />
@@ -279,8 +305,8 @@ export default function PlaySequenceScreen() {
           }}
         >
           {positions.map((pos) => {
-            const isCompleted = completedNumbers.includes(pos.id);
-            const isTarget = pos.id === currentTarget;
+            const isCompleted = completedIndices.includes(pos.id);
+            const isTarget = pos.id === currentTargetIndex;
             const isWrong = wrongTap === pos.id;
             const shouldHighlight = isTarget && showHint; // Only highlight if hint is enabled
 
@@ -319,11 +345,11 @@ export default function PlaySequenceScreen() {
                         : shouldHighlight
                         ? '#065F46' // Green text for hint
                         : colors.gray[700],
-                      fontSize: 28 * fontScale,
+                      fontSize: (mode === '10-100' ? 22 : 28) * fontScale,
                     },
                   ]}
                 >
-                  {pos.id}
+                  {pos.value}
                 </Text>
               </TouchableOpacity>
             );
@@ -333,7 +359,7 @@ export default function PlaySequenceScreen() {
         {/* Instructions */}
         <View style={[styles.instructions, { backgroundColor: colors.gray[100] }]}>
           <Text style={[styles.instructionsText, { color: colors.gray[600], fontSize: 14 * fontScale }]}>
-            Tap numbers in order: 1 → 2 → 3 → ... → 10
+            {gameConfig.instruction}
           </Text>
         </View>
       </View>

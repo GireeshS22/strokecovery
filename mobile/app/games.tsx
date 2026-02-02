@@ -126,18 +126,35 @@ export default function GamesScreen() {
           <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
         </TouchableOpacity>
 
-        {/* Number Sequence Game Button */}
+        {/* Number Sequence Game Button (1-10) */}
         <TouchableOpacity
           style={[styles.gameButton, { backgroundColor: '#7C3AED' }]}
-          onPress={() => router.push('/play-sequence')}
+          onPress={() => router.push({ pathname: '/play-sequence', params: { mode: '1-10' } })}
         >
           <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🔢</Text>
           <View style={styles.gameButtonText}>
             <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
-              Tap the Numbers
+              Tap 1-10
             </Text>
             <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
-              Tap 1-10 in order as fast as you can
+              Tap numbers 1 to 10 in order
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
+        {/* Number Sequence Game Button (10-100) */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#6366F1' }]}
+          onPress={() => router.push({ pathname: '/play-sequence', params: { mode: '10-100' } })}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🔟</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Tap 10-100
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Tap multiples of 10 in order
             </Text>
           </View>
           <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
@@ -197,26 +214,32 @@ export default function GamesScreen() {
         </Text>
         <View style={styles.gameTypesGrid}>
           <View style={[styles.gameTypeCard, { backgroundColor: colors.primary[50] }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 22 * fontScale }]}>🍎 → ?</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 10 * fontScale }]}>
-              Emoji to Word
+            <Text style={[styles.gameTypeEmoji, { fontSize: 18 * fontScale }]}>🍎 → ?</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+              Emoji→Word
             </Text>
           </View>
           <View style={[styles.gameTypeCard, { backgroundColor: colors.accent[50] }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 22 * fontScale }]}>Heart → ?</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 10 * fontScale }]}>
-              Word to Emoji
+            <Text style={[styles.gameTypeEmoji, { fontSize: 18 * fontScale }]}>Heart→?</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+              Word→Emoji
             </Text>
           </View>
           <View style={[styles.gameTypeCard, { backgroundColor: '#EDE9FE' }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 22 * fontScale }]}>1→2→3</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 10 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 18 * fontScale }]}>1→10</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
               Numbers
             </Text>
           </View>
+          <View style={[styles.gameTypeCard, { backgroundColor: '#E0E7FF' }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 18 * fontScale }]}>10→100</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+              Tens
+            </Text>
+          </View>
           <View style={[styles.gameTypeCard, { backgroundColor: '#D1FAE5' }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 22 * fontScale }]}>A→B→C</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 10 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 18 * fontScale }]}>A→J</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
               Letters
             </Text>
           </View>
@@ -340,12 +363,12 @@ const styles = StyleSheet.create({
   gameTypesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
   },
   gameTypeCard: {
-    width: '48%',
-    borderRadius: 12,
-    padding: 12,
+    width: '31%',
+    borderRadius: 10,
+    padding: 10,
     alignItems: 'center',
   },
   gameTypeEmoji: {
