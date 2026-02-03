@@ -4,6 +4,7 @@ import { Stack, router } from 'expo-router';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { gamesApi } from '../services/api';
+import { playSound } from '../utils/sounds';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 const TOTAL_LETTERS = LETTERS.length;
@@ -102,10 +103,12 @@ export default function PlayAlphabetScreen() {
     if (isComplete) return;
 
     if (index === currentTargetIndex) {
+      playSound('tap');
       setCompletedIndices(prev => [...prev, index]);
       setShowHint(false);
 
       if (index === TOTAL_LETTERS - 1) {
+        playSound('complete');
         setIsComplete(true);
         if (timerRef.current) {
           clearInterval(timerRef.current);
@@ -115,6 +118,7 @@ export default function PlayAlphabetScreen() {
         setCurrentTargetIndex(prev => prev + 1);
       }
     } else {
+      playSound('wrong');
       setWrongTap(index);
       setShowHint(true);
       if (wrongTapTimeoutRef.current) {

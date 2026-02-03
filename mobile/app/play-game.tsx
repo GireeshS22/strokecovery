@@ -5,6 +5,7 @@ import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { gamesApi } from '../services/api';
 import { getGameById, Game } from '../constants/gameContent';
+import { playSound } from '../utils/sounds';
 
 interface SessionResult {
   gameId: string;
@@ -13,14 +14,14 @@ interface SessionResult {
 }
 
 export default function PlayGameScreen() {
-  const { gameIds } = useLocalSearchParams<{ gameIds: string }>();
+  const params = useLocalSearchParams<{ gameIds: string }>();
   const { highContrast, fontScale } = useAccessibility();
   const colors = highContrast ? HighContrastColors : Colors;
 
-  // Parse game IDs from params
-  const sessionGameIds = gameIds ? gameIds.split(',') : [];
-  const totalGames = sessionGameIds.length;
+  // Parse game IDs from params - handle array case from expo-router
+  const gameIdsParam = Array.isArray(params.gameIds) ? params.gameIds[0] : params.gameIds;
 
+  const [sessionGameIds, setSessionGameIds] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [game, setGame] = useState<Game | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -30,7 +31,17 @@ export default function PlayGameScreen() {
   const [sessionResults, setSessionResults] = useState<SessionResult[]>([]);
   const [showSummary, setShowSummary] = useState(false);
 
+  const totalGames = sessionGameIds.length;
   const feedbackOpacity = useRef(new Animated.Value(0)).current;
+
+  // Initialize session game IDs once
+  useEffect(() => {
+    if (gameIdsParam && sessionGameIds.length === 0) {
+      const ids = gameIdsParam.split(',');
+      setSessionGameIds(ids);
+      setSessionStartTime(Date.now());
+    }
+  }, [gameIdsParam]);
 
   // Load current game
   useEffect(() => {
@@ -45,18 +56,16 @@ export default function PlayGameScreen() {
         feedbackOpacity.setValue(0);
       }
     }
-
-    // Set session start time on first game
-    if (currentIndex === 0 && sessionStartTime === 0) {
-      setSessionStartTime(Date.now());
-    }
-  }, [currentIndex, gameIds]);
+  }, [currentIndex, sessionGameIds]);
 
   const handleOptionPress = async (index: number) => {
     if (selectedIndex !== null || !game) return;
 
     const correct = game.options[index].isCorrect;
     const timeSeconds = Math.round((Date.now() - startTime) / 1000);
+
+    // Play sound
+    playSound(correct ? 'correct' : 'wrong');
 
     setSelectedIndex(index);
     setIsCorrect(correct);
@@ -91,6 +100,7 @@ export default function PlayGameScreen() {
   const handleNextGame = () => {
     if (currentIndex + 1 >= totalGames) {
       // Session complete, show summary
+      playSound('complete');
       setShowSummary(true);
     } else {
       // Move to next game
@@ -110,7 +120,8 @@ export default function PlayGameScreen() {
   if (showSummary) {
     const correctCount = sessionResults.filter(r => r.correct).length;
     const totalTime = Math.round((Date.now() - sessionStartTime) / 1000);
-    const accuracy = Math.round((correctCount / totalGames) * 100);
+    const gamesPlayed = sessionResults.length || 1; // Avoid division by zero
+    const accuracy = Math.round((correctCount / gamesPlayed) * 100);
     const missedGames = sessionResults.filter(r => !r.correct);
 
     return (
@@ -137,7 +148,7 @@ export default function PlayGameScreen() {
           <View style={styles.summaryStats}>
             <View style={[styles.summaryStatCard, { backgroundColor: colors.primary[50] }]}>
               <Text style={[styles.summaryStatNumber, { color: colors.primary[600], fontSize: 36 * fontScale }]}>
-                {correctCount}/{totalGames}
+                {correctCount}/{gamesPlayed}
               </Text>
               <Text style={[styles.summaryStatLabel, { color: colors.gray[600], fontSize: 14 * fontScale }]}>
                 Correct

@@ -4,6 +4,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { gamesApi } from '../services/api';
+import { playSound } from '../utils/sounds';
 
 const CIRCLE_SIZE = 70;
 const MIN_DISTANCE = 85; // Minimum distance between circle centers
@@ -47,6 +48,18 @@ const GAME_MODES: Record<string, GameModeConfig> = {
     title: 'Random Decades',
     instruction: 'Tap numbers in order: smallest → largest',
     gameId: 'sequence_random',
+  },
+  'even': {
+    numbers: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
+    title: 'Even Numbers',
+    instruction: 'Tap even numbers: 2 → 4 → 6 → ... → 20',
+    gameId: 'sequence_even',
+  },
+  'odd': {
+    numbers: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
+    title: 'Odd Numbers',
+    instruction: 'Tap odd numbers: 1 → 3 → 5 → ... → 19',
+    gameId: 'sequence_odd',
   },
 };
 
@@ -170,11 +183,13 @@ export default function PlaySequenceScreen() {
 
     if (index === currentTargetIndex) {
       // Correct tap
+      playSound('tap');
       setCompletedIndices(prev => [...prev, index]);
       setShowHint(false); // Reset hint for next number
 
       if (index === totalNumbers - 1) {
         // Game complete
+        playSound('complete');
         setIsComplete(true);
         if (timerRef.current) {
           clearInterval(timerRef.current);
@@ -186,6 +201,7 @@ export default function PlaySequenceScreen() {
       }
     } else {
       // Wrong tap - flash red and show hint
+      playSound('wrong');
       setWrongTap(index);
       setShowHint(true); // Enable hint after wrong tap
       if (wrongTapTimeoutRef.current) {
@@ -387,7 +403,7 @@ export default function PlaySequenceScreen() {
                         : shouldHighlight
                         ? '#065F46' // Green text for hint
                         : colors.gray[700],
-                      fontSize: (mode === '10-100' || mode === 'random' ? 22 : 28) * fontScale,
+                      fontSize: (mode === '1-10' ? 28 : 22) * fontScale,
                     },
                   ]}
                 >

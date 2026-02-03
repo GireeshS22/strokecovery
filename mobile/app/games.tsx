@@ -177,6 +177,40 @@ export default function GamesScreen() {
           <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
         </TouchableOpacity>
 
+        {/* Even Numbers Game Button */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#14B8A6' }]}
+          onPress={() => router.push({ pathname: '/play-sequence', params: { mode: 'even' } })}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>2️⃣</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Even Numbers
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Tap 2, 4, 6, 8... up to 20
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
+        {/* Odd Numbers Game Button */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#F97316' }]}
+          onPress={() => router.push({ pathname: '/play-sequence', params: { mode: 'odd' } })}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>1️⃣</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Odd Numbers
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Tap 1, 3, 5, 7... up to 19
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
         {/* Alphabet Sequence Game Button */}
         <TouchableOpacity
           style={[styles.gameButton, { backgroundColor: '#059669' }]}
@@ -189,6 +223,23 @@ export default function GamesScreen() {
             </Text>
             <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
               Tap A-J in order as fast as you can
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
+        {/* Odd One Out Game Button */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#8B5CF6' }]}
+          onPress={() => router.push('/play-odd-one-out')}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🔍</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Odd One Out
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Find the emoji that doesn't belong
             </Text>
           </View>
           <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
@@ -231,39 +282,57 @@ export default function GamesScreen() {
         </Text>
         <View style={styles.gameTypesGrid}>
           <View style={[styles.gameTypeCard, { backgroundColor: colors.primary[50] }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 16 * fontScale }]}>🍎→?</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>🍎→?</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
               Emoji
             </Text>
           </View>
           <View style={[styles.gameTypeCard, { backgroundColor: colors.accent[50] }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 16 * fontScale }]}>Word→?</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>Word</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
               Word
             </Text>
           </View>
           <View style={[styles.gameTypeCard, { backgroundColor: '#EDE9FE' }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 16 * fontScale }]}>1→10</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>1→10</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
               Numbers
             </Text>
           </View>
           <View style={[styles.gameTypeCard, { backgroundColor: '#E0E7FF' }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 16 * fontScale }]}>10→100</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>10→100</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
               Tens
             </Text>
           </View>
           <View style={[styles.gameTypeCard, { backgroundColor: '#FCE7F3' }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 16 * fontScale }]}>🎲</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>🎲</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
               Random
             </Text>
           </View>
+          <View style={[styles.gameTypeCard, { backgroundColor: '#CCFBF1' }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>2,4,6</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
+              Even
+            </Text>
+          </View>
+          <View style={[styles.gameTypeCard, { backgroundColor: '#FFEDD5' }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>1,3,5</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
+              Odd
+            </Text>
+          </View>
           <View style={[styles.gameTypeCard, { backgroundColor: '#D1FAE5' }]}>
-            <Text style={[styles.gameTypeEmoji, { fontSize: 16 * fontScale }]}>A→J</Text>
-            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 9 * fontScale }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>A→J</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
               Letters
+            </Text>
+          </View>
+          <View style={[styles.gameTypeCard, { backgroundColor: '#EDE9FE' }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>🔍</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
+              Odd Out
             </Text>
           </View>
         </View>
@@ -386,12 +455,12 @@ const styles = StyleSheet.create({
   gameTypesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
   },
   gameTypeCard: {
-    width: '31%',
-    borderRadius: 10,
-    padding: 10,
+    width: '23%',
+    borderRadius: 8,
+    padding: 8,
     alignItems: 'center',
   },
   gameTypeEmoji: {
