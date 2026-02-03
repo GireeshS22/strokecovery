@@ -5,9 +5,9 @@
 | Phase | Status | Completed |
 |-------|--------|-----------|
 | Phase 1 | **COMPLETE** | 4/4 features |
-| Phase 2 | In Progress | 2/4 features |
+| Phase 2 | In Progress | 3/4 features |
 | Phase 3 | Not Started | 0/4 features |
-| Phase 4 | Not Started | 0/5 features |
+| Phase 4 | In Progress | 1/5 features |
 | Phase 5 | Not Started | 0/4 features |
 
 ---
@@ -58,7 +58,7 @@
 | 2.1 | **Daily Stroke Bites** | Swipeable cards with facts, tips, encouragement (Instagram stories style) | Pending |
 | 2.2 | **Ailment Journal** | Log symptoms (pain, fatigue, dizziness) with date, location, severity | Done |
 | 2.3 | **Mood Tracker** | Daily mood check-in with emoji scale, weekly/monthly trends view | Done |
-| 2.4 | **Streaks & Milestones** | Visual celebrations for consistency (7-day streak, 100 days since stroke) | Pending |
+| 2.4 | **Streaks & Milestones** | Visual celebrations for consistency (7-day streak, 100 days since stroke) | Partial (Games) |
 
 ### Phase 2 Technical Notes
 
@@ -104,13 +104,13 @@
 
 *Rehabilitation tools and clinical utility*
 
-| # | Feature | Description | Data Needed | Difficulty |
-|---|---------|-------------|-------------|------------|
-| 4.1 | **Cognitive Exercises** | Memory games, word-finding, attention tasks | Game content: word lists, image sets, puzzle logic | Medium-Hard |
-| 4.2 | **Speech Practice** | Record speech, sample phrases, track clarity over time | Audio storage, sample phrases (50-100) | Medium |
-| 4.3 | **Appointment Tracker** | Doctor visits, "questions to ask" notepad | Appointment schema | Easy |
-| 4.4 | **Export Reports** | Generate PDF summary for doctor visits | PDF template, data aggregation logic | Medium |
-| 4.5 | **Vitals Logging** | Track blood pressure, blood sugar, weight | Vitals schema, healthy range reference data | Easy |
+| # | Feature | Description | Data Needed | Status |
+|---|---------|-------------|-------------|--------|
+| 4.1 | **Cognitive Exercises** | Memory games, word-finding, attention tasks | Game content: word lists, image sets, puzzle logic | Done |
+| 4.2 | **Speech Practice** | Record speech, sample phrases, track clarity over time | Audio storage, sample phrases (50-100) | Pending |
+| 4.3 | **Appointment Tracker** | Doctor visits, "questions to ask" notepad | Appointment schema | Pending |
+| 4.4 | **Export Reports** | Generate PDF summary for doctor visits | PDF template, data aggregation logic | Pending |
+| 4.5 | **Vitals Logging** | Track blood pressure, blood sugar, weight | Vitals schema, healthy range reference data | Pending |
 
 ### Phase 4 Technical Notes
 
@@ -118,6 +118,25 @@
 - Speech practice needs secure audio storage (consider privacy)
 - PDF export should be shareable via email or messaging apps
 - Vitals can integrate with Apple Health / Google Fit in Phase 5
+
+### Cognitive Exercises - Implementation Details
+
+**Games Built:**
+| Game Type | Description | Variants |
+|-----------|-------------|----------|
+| Word-Image Match | Match emojis to words and vice versa | 20 questions, 10-round sessions |
+| Number Sequence | Tap numbers in order | 1-10, 10-100, Random Decades, Even (2-20), Odd (1-19) |
+| Alphabet Sequence | Tap letters A-J in order | Single mode with timer |
+| Odd One Out | Find emoji that doesn't belong | 10 categories, 5-10 items per round, variable difficulty |
+
+**Features:**
+- Session-based gameplay (10 rounds per session)
+- Progress tracking with accuracy and time
+- Daily streak tracking
+- Sound effects (correct, wrong, complete, tap)
+- Hint system (activates after wrong answer)
+- Session summaries with stats
+- Random positioning to prevent memorization
 
 ### Phase 4 Success Criteria
 
@@ -166,9 +185,11 @@ IMPACT
 1. ~~Auth + Medicine Reminder (validate push notifications)~~ **DONE**
 2. ~~Therapy Calendar (core tracking loop)~~ **DONE**
 3. ~~Basic Accessibility (essential for target users)~~ **DONE**
-4. Daily Stroke Bites (engagement hook) - **NEXT**
-5. ~~Ailment + Mood tracking (complete journaling)~~ **DONE**
-6. Streaks & Milestones (retention)
-7. Community features (longer runway, moderation needed)
-8. Advanced features (differentiation)
-9. Integrations (scale)
+4. ~~Ailment + Mood tracking (complete journaling)~~ **DONE**
+5. ~~Cognitive Exercises / Brain Games~~ **DONE**
+6. ~~Game Streaks & Sound Effects~~ **DONE**
+7. Daily Stroke Bites (engagement hook) - **NEXT**
+8. Streaks & Milestones for other features (retention)
+9. Community features (longer runway, moderation needed)
+10. Speech Practice, Appointments, Reports (advanced features)
+11. Integrations (scale)
