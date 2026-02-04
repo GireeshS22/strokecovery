@@ -45,3 +45,6 @@ htmlcov/
 # Misc
 *.bak
 *.tmp
+
+# Paper Refinery - research PDFs (large files)
+server/data/papers/*.pdf
