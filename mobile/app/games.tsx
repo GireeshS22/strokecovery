@@ -4,7 +4,7 @@ import { Stack, router, useFocusEffect } from 'expo-router';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { gamesApi, GameStats } from '../services/api';
-import { allGames } from '../constants/gameContent';
+import { allGames, getGamesByType } from '../constants/gameContent';
 
 const GAMES_PER_SESSION = 10;
 
@@ -45,9 +45,9 @@ export default function GamesScreen() {
     }, [])
   );
 
-  const handleStartSession = () => {
-    // Shuffle all games and pick first 10
-    const shuffled = shuffleArray(allGames);
+  const handleStartSession = (type: 'emoji_to_word' | 'word_to_emoji') => {
+    const pool = getGamesByType(type);
+    const shuffled = shuffleArray(pool);
     const sessionGames = shuffled.slice(0, GAMES_PER_SESSION);
     const gameIds = sessionGames.map(g => g.id).join(',');
 
@@ -109,18 +109,35 @@ export default function GamesScreen() {
           Choose a Game
         </Text>
 
-        {/* Word-Image Game Button */}
+        {/* Emoji to Word Game Button */}
         <TouchableOpacity
           style={[styles.gameButton, { backgroundColor: colors.primary[600] }]}
-          onPress={handleStartSession}
+          onPress={() => handleStartSession('emoji_to_word')}
         >
           <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🧠</Text>
           <View style={styles.gameButtonText}>
             <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
-              Word-Image Match
+              Emoji → Word
             </Text>
             <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
-              Match emojis and words ({GAMES_PER_SESSION} rounds)
+              See an emoji, pick the matching word
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
+        {/* Word to Emoji Game Button */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#2563EB' }]}
+          onPress={() => handleStartSession('word_to_emoji')}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>💬</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Word → Emoji
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              See a word, pick the matching emoji
             </Text>
           </View>
           <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>

@@ -14,6 +14,16 @@ interface SessionResult {
   timeSeconds: number;
 }
 
+function shuffleOptions(game: Game): Game {
+  const shuffled = [...game.options];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const newCorrectIndex = shuffled.findIndex(opt => opt.isCorrect);
+  return { ...game, options: shuffled, correctIndex: newCorrectIndex };
+}
+
 export default function PlayGameScreen() {
   const params = useLocalSearchParams<{ gameIds: string }>();
   const { highContrast, fontScale } = useAccessibility();
@@ -50,7 +60,7 @@ export default function PlayGameScreen() {
       const gameId = sessionGameIds[currentIndex];
       const foundGame = getGameById(gameId);
       if (foundGame) {
-        setGame(foundGame);
+        setGame(shuffleOptions(foundGame));
         setStartTime(Date.now());
         setSelectedIndex(null);
         setIsCorrect(null);
