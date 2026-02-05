@@ -12,36 +12,49 @@ from ..models import Section, ExtractedInsight, SectionExtraction, PaperExtracti
 
 
 # System prompt for insight extraction
-EXTRACTION_SYSTEM_PROMPT = """You are a medical research analyst specializing in stroke rehabilitation research.
-Your task is to extract key insights from scientific paper sections.
+EXTRACTION_SYSTEM_PROMPT = """You extract practical stroke recovery insights from research papers for an app used by stroke survivors and their caregivers. These are non-medical people looking for actionable, encouraging, evidence-based information.
 
-For each section, identify distinct insights that would be valuable for stroke survivors and caregivers.
+ONLY extract an insight if a stroke survivor or caregiver could:
+- DO something with it (exercise, diet, therapy technique, lifestyle change)
+- UNDERSTAND their recovery better (timelines, what to expect, why something happens)
+- FEEL informed about a treatment option to discuss with their doctor
+- GAIN hope from a concrete, evidence-backed outcome
 
-Focus on:
-- Rehabilitation techniques and their effectiveness
-- Recovery timelines and outcomes
-- Treatment recommendations
-- Risk factors and prevention
-- Quality of life improvements
-- Specific metrics and statistics
+DO NOT extract:
+- Study methodology or design descriptions ("This was a randomized controlled trial...")
+- Statistical techniques or analysis methods ("We used Cox regression...")
+- Background/literature review claims not from this paper's own findings
+- Raw biomarker or imaging data without patient-relevant interpretation
+- Findings about animal models, cell cultures, or non-human subjects
+- Purely clinical details only relevant to doctors (drug pharmacokinetics, surgical techniques)
+- Vague or generic statements ("More research is needed", "Stroke is a leading cause of disability")
+- Duplicate findings — if the same result appears in the abstract and discussion, extract it only once
 
-For each insight, extract:
-1. claim: The main finding (1-2 sentences)
-2. evidence: Supporting methodology or data (if mentioned)
-3. quantitative_result: Specific numbers, percentages, p-values
-4. stroke_types: Which stroke types this applies to (ischemic, hemorrhagic, tbi, or empty if general)
-5. recovery_phase: When this applies (acute: 0-7 days, subacute: 1 week-6 months, chronic: 6+ months, or null)
-6. intervention: The treatment/therapy discussed (if any)
-7. sample_size: Number of participants (if mentioned)
+QUALITY BAR: If you are unsure whether an insight is useful to a patient, leave it out. Fewer high-quality insights are far better than many irrelevant ones. Most sections should yield 0-3 insights. Return an empty list rather than stretch to fill it.
 
-Return your response as a JSON object with this exact structure:
+WRITING STYLE for the "claim" field:
+- Write in plain language a non-medical person can understand
+- Be specific: "Walking 30 minutes daily improved arm movement by 23%" not "Exercise improved outcomes"
+- Include the timeframe and magnitude when available
+- Avoid jargon — use "blood clot stroke" not "ischemic cerebrovascular accident"
+
+For each insight, extract these fields:
+1. claim: The main finding in plain language (1-2 sentences, written for patients)
+2. evidence: Brief description of how strong the evidence is (e.g., "Randomized trial with 200 patients" or "Small pilot study"). Null if unclear.
+3. quantitative_result: Key numbers that show the size of the effect (e.g., "23% improvement in walking speed, p<0.05"). Null if not reported.
+4. stroke_types: Which stroke types this applies to. Use: "ischemic", "hemorrhagic", "tbi". Leave empty [] if the finding applies generally.
+5. recovery_phase: When in recovery this applies. Use: "acute" (first week), "subacute" (1 week to 6 months), "chronic" (6+ months). Null if not phase-specific.
+6. intervention: The specific treatment, therapy, or activity (e.g., "constraint-induced movement therapy", "daily walking", "anti-seizure medication"). Null if this is an observational finding.
+7. sample_size: Number of human participants. Null if not stated.
+
+Return JSON:
 {
     "insights": [
         {
             "claim": "string",
             "evidence": "string or null",
             "quantitative_result": "string or null",
-            "stroke_types": ["ischemic", "hemorrhagic"],
+            "stroke_types": [],
             "recovery_phase": "subacute",
             "intervention": "physical therapy",
             "sample_size": 150
@@ -49,19 +62,33 @@ Return your response as a JSON object with this exact structure:
     ]
 }
 
-If the section has no relevant insights (e.g., references, acknowledgments), return {"insights": []}.
-Only extract factual findings, not speculations or future research suggestions."""
+If the section has no patient-relevant insights, return {"insights": []}. This is expected for methods, references, and many technical sections."""
+
+
+SECTION_GUIDANCE = {
+    "abstract": "This is the abstract — it may summarize the key finding. Extract only the main patient-relevant result, not background or methodology.",
+    "introduction": "Introductions mostly contain background. Only extract if there is a specific, cited statistic about recovery outcomes that a patient would find useful.",
+    "methods": "Methods sections rarely contain patient-relevant insights. Only extract if there is a description of a specific therapy protocol a patient could ask their therapist about.",
+    "results": "This is where the key findings are. Focus on outcomes that show how much a treatment helped and for whom.",
+    "discussion": "Discussions interpret results. Only extract new patient-relevant interpretations not already covered in the results. Avoid speculation and 'future research' statements.",
+    "conclusion": "Extract only if the conclusion states a clear, actionable takeaway not already captured from earlier sections.",
+}
 
 
 def create_extraction_prompt(section: Section) -> str:
     """Create the user prompt for a section."""
-    return f"""Extract insights from this {section.section_name.upper()} section of a stroke research paper:
+    section_lower = section.section_name.lower()
+    guidance = SECTION_GUIDANCE.get(section_lower, "Extract only findings that are directly useful to a stroke survivor or caregiver.")
+
+    return f"""Extract patient-relevant insights from this {section.section_name.upper()} section of a stroke research paper.
+
+Guidance for this section type: {guidance}
 
 ---
 {section.raw_text}
 ---
 
-Return JSON with the extracted insights."""
+Return JSON. If nothing here is useful for a patient, return {{"insights": []}}."""
 
 
 def parse_llm_response(response_text: str) -> List[ExtractedInsight]:
@@ -121,8 +148,14 @@ def extract_insights_from_section(
     """
     model = model or settings.together_model
 
-    # Skip sections that typically don't have insights
-    skip_sections = {"references", "acknowledgments", "acknowledgements", "preamble"}
+    # Skip sections that typically don't have patient-relevant insights
+    skip_sections = {
+        "references", "acknowledgments", "acknowledgements", "preamble",
+        "funding", "declarations", "conflicts of interest", "conflict of interest",
+        "author contributions", "supplementary", "supplementary materials",
+        "appendix", "abbreviations", "ethics", "ethics statement",
+        "data availability", "competing interests",
+    }
     if section.section_name.lower() in skip_sections:
         return SectionExtraction(section_name=section.section_name, insights=[])
 
