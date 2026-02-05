@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, ScrollView } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
@@ -126,14 +127,8 @@ export default function PlayGameScreen() {
 
     return (
       <>
-        <Stack.Screen
-          options={{
-            title: 'Session Complete',
-            headerStyle: { backgroundColor: colors.primary[600] },
-            headerTintColor: '#fff',
-            headerLeft: () => null, // Disable back button
-          }}
-        />
+        <StatusBar hidden />
+        <Stack.Screen options={{ headerShown: false }} />
         <ScrollView style={[styles.container, { backgroundColor: colors.surface }]} contentContainerStyle={styles.summaryContent}>
           {/* Result Emoji */}
           <Text style={[styles.summaryEmoji, { fontSize: 80 * fontScale }]}>
@@ -227,13 +222,8 @@ export default function PlayGameScreen() {
   if (!game || sessionGameIds.length === 0) {
     return (
       <>
-        <Stack.Screen
-          options={{
-            title: 'Game',
-            headerStyle: { backgroundColor: colors.primary[600] },
-            headerTintColor: '#fff',
-          }}
-        />
+        <StatusBar hidden />
+        <Stack.Screen options={{ headerShown: false }} />
         <View style={[styles.container, { backgroundColor: colors.surface }]}>
           <Text style={[styles.errorText, { color: colors.gray[600], fontSize: 16 * fontScale }]}>
             No games found
@@ -247,13 +237,8 @@ export default function PlayGameScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: `Game ${currentIndex + 1} of ${totalGames}`,
-          headerStyle: { backgroundColor: colors.primary[600] },
-          headerTintColor: '#fff',
-        }}
-      />
+      <StatusBar hidden />
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.container, { backgroundColor: colors.surface }]}>
         {/* Progress Bar */}
         <View style={[styles.progressContainer, { backgroundColor: colors.gray[200] }]}>

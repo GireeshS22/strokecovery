@@ -14,14 +14,17 @@ export default function RootLayout() {
 
   return (
     <AccessibilityProvider>
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <Stack
         screenOptions={{
-          headerShown: false,
+          headerShown: true,
+          headerStyle: { backgroundColor: Colors.primary[600] },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: '600' },
           contentStyle: { backgroundColor: Colors.background },
         }}
       >
-        <Stack.Screen name="index" />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />

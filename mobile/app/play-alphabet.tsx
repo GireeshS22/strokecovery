@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Stack, router } from 'expo-router';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
@@ -169,14 +170,8 @@ export default function PlayAlphabetScreen() {
   if (isComplete) {
     return (
       <>
-        <Stack.Screen
-          options={{
-            title: 'Complete!',
-            headerStyle: { backgroundColor: colors.primary[600] },
-            headerTintColor: '#fff',
-            headerLeft: () => null,
-          }}
-        />
+        <StatusBar hidden />
+        <Stack.Screen options={{ headerShown: false }} />
         <View style={[styles.container, styles.completionContainer, { backgroundColor: colors.surface }]}>
           <Text style={[styles.completionEmoji, { fontSize: 80 * fontScale }]}>🎉</Text>
           <Text style={[styles.completionTitle, { color: colors.gray[800], fontSize: 28 * fontScale }]}>
@@ -221,13 +216,8 @@ export default function PlayAlphabetScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'Tap the Letters',
-          headerStyle: { backgroundColor: colors.primary[600] },
-          headerTintColor: '#fff',
-        }}
-      />
+      <StatusBar hidden />
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.container, { backgroundColor: colors.surface }]}>
         <View style={[styles.header, { borderBottomColor: colors.gray[200] }]}>
           <View style={styles.headerLeft}>
@@ -387,6 +377,7 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 16,
     position: 'relative',
+    overflow: 'hidden',
   },
   circle: {
     position: 'absolute',

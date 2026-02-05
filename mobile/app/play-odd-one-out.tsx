@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Stack, router } from 'expo-router';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
@@ -232,6 +233,7 @@ export default function PlayOddOneOutScreen() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [wrongTap, setWrongTap] = useState<number | null>(null);
+  const [hasWrongAttempt, setHasWrongAttempt] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [gameAreaSize, setGameAreaSize] = useState({ width: 0, height: 0 });
   const [gameStarted, setGameStarted] = useState(false);
@@ -282,12 +284,13 @@ export default function PlayOddOneOutScreen() {
         clearInterval(timerRef.current);
       }
 
-      // Add to session results
+      // Add to session results (incorrect if any wrong attempts)
+      const wasCorrect = !hasWrongAttempt;
       setSessionResults(prev => [...prev, {
         category: question.pool.category,
         oddEmoji: question.oddEmoji,
         explanation: question.oddExplanation,
-        correct: true,
+        correct: wasCorrect,
         timeSeconds: elapsedTime,
       }]);
 
@@ -296,7 +299,7 @@ export default function PlayOddOneOutScreen() {
         await gamesApi.saveResult({
           game_id: question.pool.id,
           game_type: 'odd_one_out',
-          score: 1,
+          score: wasCorrect ? 1 : 0,
           time_seconds: elapsedTime,
         });
       } catch (err) {
@@ -305,6 +308,7 @@ export default function PlayOddOneOutScreen() {
     } else {
       // Wrong - flash red and show hint
       playSound('wrong');
+      setHasWrongAttempt(true);
       setWrongTap(tappedIndex);
       setShowHint(true);
       if (wrongTapTimeoutRef.current) {
@@ -331,6 +335,7 @@ export default function PlayOddOneOutScreen() {
     setIsCorrect(null);
     setShowHint(false);
     setWrongTap(null);
+    setHasWrongAttempt(false);
     setElapsedTime(0);
     setGameStarted(false);
     setCurrentRound(prev => prev + 1);
@@ -360,14 +365,8 @@ export default function PlayOddOneOutScreen() {
 
     return (
       <>
-        <Stack.Screen
-          options={{
-            title: 'Session Complete',
-            headerStyle: { backgroundColor: colors.primary[600] },
-            headerTintColor: '#fff',
-            headerLeft: () => null,
-          }}
-        />
+        <StatusBar hidden />
+        <Stack.Screen options={{ headerShown: false }} />
         <ScrollView style={[styles.container, { backgroundColor: colors.surface }]} contentContainerStyle={styles.summaryContent}>
           <Text style={[styles.summaryEmoji, { fontSize: 80 * fontScale }]}>
             {accuracy >= 80 ? '🎉' : accuracy >= 50 ? '👍' : '💪'}
@@ -432,13 +431,8 @@ export default function PlayOddOneOutScreen() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: `Round ${currentRound} of ${SESSION_LENGTH}`,
-          headerStyle: { backgroundColor: colors.primary[600] },
-          headerTintColor: '#fff',
-        }}
-      />
+      <StatusBar hidden />
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.container, { backgroundColor: colors.surface }]}>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: colors.gray[200] }]}>
@@ -620,6 +614,7 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 16,
     position: 'relative',
+    overflow: 'hidden',
   },
   circle: {
     position: 'absolute',
