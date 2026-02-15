@@ -33,7 +33,8 @@ export default function StrokeBitesScreen() {
         response = await strokeBitesApi.getToday();
       } catch (err: any) {
         // 404 means not generated yet, so generate
-        if (err.message.includes('not generated') || err.message.includes('404')) {
+        if (err.status === 404 || err.message.includes('not generated') || err.message.includes('404')) {
+          console.log('No cached bites, generating new ones...');
           response = await strokeBitesApi.generate();
         } else {
           throw err;

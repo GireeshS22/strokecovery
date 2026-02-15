@@ -43,7 +43,9 @@ async function request<T>(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(error.detail || 'Request failed');
+    const errorObj: any = new Error(error.detail || 'Request failed');
+    errorObj.status = response.status; // Include status code
+    throw errorObj;
   }
 
   return response.json();
