@@ -98,33 +98,23 @@ def fetch_insights(
     if len(insights) < 5:
         try:
             recovery_phase = get_recovery_phase(profile.stroke_date)
+            needed = 6 - len(insights)
 
-            # Build filter conditions
-            conditions = []
+            # Use Supabase table query with filters
+            query = client.table("insights").select("id, claim, evidence, quantitative_result, stroke_types, recovery_phase, intervention, sample_size")
+
+            # Apply filters
             if profile.stroke_type:
-                conditions.append(f"stroke_types @> ARRAY['{profile.stroke_type}']::text[]")
+                query = query.contains("stroke_types", [profile.stroke_type])
             if recovery_phase != "unknown":
-                conditions.append(f"recovery_phase = '{recovery_phase}'")
+                query = query.eq("recovery_phase", recovery_phase)
             if exclude_ids:
                 # Exclude already-shown IDs and already-fetched IDs
                 all_exclude = exclude_ids + [i['id'] for i in insights]
-                exclude_str = "', '".join(all_exclude)
-                conditions.append(f"id NOT IN ('{exclude_str}')")
+                query = query.not_.in_("id", all_exclude)
 
-            where_clause = " AND ".join(conditions) if conditions else "1=1"
-
-            # Random selection
-            needed = 6 - len(insights)
-            query = f"""
-                SELECT id, claim, evidence, quantitative_result, stroke_types,
-                       recovery_phase, intervention, sample_size
-                FROM insights
-                WHERE {where_clause}
-                ORDER BY random()
-                LIMIT {needed}
-            """
-
-            result = client.rpc('execute_sql', {'query': query}).execute()
+            # Random selection via limit
+            result = query.limit(needed).execute()
             if result.data:
                 insights.extend(result.data)
         except Exception as e:
@@ -271,6 +261,8 @@ def generate_bites(profile: PatientProfile, db: Session) -> Dict:
     """
     Main orchestrator: fetch insights → build prompt → call LLM → validate → return.
     """
+    print(f"[Bite Generator] Starting generation for patient {profile.id}")
+
     # Get past bites to avoid repeating insights
     from datetime import timedelta
     cutoff_date = date.today() - timedelta(days=14)
@@ -289,20 +281,29 @@ def generate_bites(profile: PatientProfile, db: Session) -> Dict:
                     exclude_ids.append(card['source_insight_id'])
 
     # Fetch insights
+    print(f"[Bite Generator] Fetching insights...")
     insights = fetch_insights(profile, exclude_ids, db)
+    print(f"[Bite Generator] Found {len(insights)} insights")
 
     # Get past Q&A answers
+    print(f"[Bite Generator] Fetching past answers...")
     past_answers = get_past_answers(profile.id, db)
+    print(f"[Bite Generator] Found {len(past_answers)} past preferences")
 
     # Build prompts
+    print(f"[Bite Generator] Building prompts...")
     system_prompt, user_prompt = build_prompt(profile, insights, past_answers)
 
     # Call LLM
+    print(f"[Bite Generator] Calling LLM (this may take 5-10 seconds)...")
     try:
         result = call_llm(system_prompt, user_prompt)
+        print(f"[Bite Generator] LLM call successful, got {len(result.get('cards', []))} cards")
     except Exception as e:
+        print(f"[Bite Generator] LLM call failed: {e}")
         # Fall back to static bites
         from app.services.fallback_bites import get_fallback_bites
+        print(f"[Bite Generator] Using fallback bites")
         return get_fallback_bites()
 
     # Validate
