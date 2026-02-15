@@ -329,7 +329,16 @@ def generate_bites(profile: PatientProfile, db: Session) -> Dict:
 
     # Build prompts
     print(f"[Bite Generator] Building prompts...")
-    system_prompt, user_prompt = build_prompt(profile, insights, past_answers)
+    try:
+        system_prompt, user_prompt = build_prompt(profile, insights, past_answers)
+        print(f"[Bite Generator] Prompts built successfully")
+        print(f"[Bite Generator] System prompt length: {len(system_prompt)} chars")
+        print(f"[Bite Generator] User prompt length: {len(user_prompt)} chars")
+    except Exception as e:
+        import traceback
+        print(f"[Bite Generator] Prompt building failed: {e}")
+        print(f"[Bite Generator] Full traceback: {traceback.format_exc()}")
+        raise
 
     # Call LLM
     print(f"[Bite Generator] Calling LLM (this may take 5-10 seconds)...")

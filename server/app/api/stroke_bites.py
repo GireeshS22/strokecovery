@@ -124,9 +124,13 @@ def generate_todays_bites(
     try:
         result = generate_bites(profile, db)
     except Exception as e:
+        import traceback
+        error_detail = f"Failed to generate bites: {str(e)}"
+        print(f"[API ERROR] {error_detail}")
+        print(f"[API ERROR] Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate bites: {str(e)}"
+            detail=error_detail
         )
 
     # Store in database
