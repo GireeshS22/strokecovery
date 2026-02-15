@@ -156,16 +156,16 @@ def build_prompt(
 
 RULES:
 1. Generate exactly 8-10 cards in a flat list
-2. Include 1 welcome card, 2-3 research fact cards, 1-2 Q&A cards, and conditional responses for each Q&A
-3. Q&A cards branch: each option's next_card_id points to a different conditional_response card. Both branches must rejoin the main sequence.
-4. Card IDs use format "c1", "c2", "c3", "c4a", "c4b", etc.
-5. The last card in the main path has next_card_id: null
-6. Research facts must be based ONLY on the provided insights - do not invent medical claims
-7. Use warm, encouraging, plain language. The reader may have cognitive difficulties.
-8. Each card body should be 1-3 short sentences max.
-9. background_color must be a valid hex color from this palette:
-   "#0D9488" (teal), "#2563EB" (blue), "#7C3AED" (purple),
-   "#059669" (green), "#EA580C" (orange), "#EC4899" (pink)
+2. MUST include: 1 welcome card, 2-3 research fact cards (if insights provided), AT LEAST 1 Q&A card with 2 options, and conditional responses for each Q&A branch
+3. Q&A cards are REQUIRED - each Q&A card has type="qa" with a "question" field and "options" array (no "body" field)
+4. Each Q&A option must have next_card_id pointing to a conditional_response card
+5. Both Q&A branches must rejoin the main sequence
+6. Card IDs use format "c1", "c2", "c3", "c4a", "c4b", etc.
+7. The last card in the main path has next_card_id: null
+8. Research facts must be based ONLY on the provided insights - do not invent medical claims
+9. Use warm, encouraging, plain language. The reader may have cognitive difficulties.
+10. Each card body should be 1-3 short sentences max.
+11. Do NOT include "background_color" field - colors will be assigned automatically based on card type
 
 OUTPUT FORMAT:
 {
@@ -195,9 +195,25 @@ Research insights to use (reference by source_insight_id):
     'intervention': i.get('intervention')
 } for i in insights], indent=2)}
 
-Generate 8-10 cards with 1-2 Q&A questions that help personalize future content.
+IMPORTANT: Generate 8-10 cards with AT LEAST 1 Q&A question that helps personalize future content.
 The Q&A questions should ask about the patient's daily habits, therapy experience,
 or recovery goals - things not already known from their profile.
+
+Example Q&A card structure:
+{
+  "id": "c3",
+  "type": "qa",
+  "title": null,
+  "body": "",
+  "emoji": "🤔",
+  "question": "Do you exercise regularly each week?",
+  "options": [
+    {"key": "a", "label": "Yes, 3+ times a week", "next_card_id": "c4a"},
+    {"key": "b", "label": "No, not regularly", "next_card_id": "c4b"}
+  ],
+  "next_card_id": null,
+  "source_insight_id": null
+}
 
 Return ONLY valid JSON, no markdown formatting."""
 
@@ -233,6 +249,27 @@ def call_llm(system_prompt: str, user_prompt: str) -> Dict:
     except Exception as e:
         print(f"LLM call failed: {e}")
         raise
+
+
+def assign_card_colors(cards_data: List[Dict]) -> List[Dict]:
+    """
+    Assign pleasant, eye-friendly background colors based on card type.
+    Softer palette for better readability and less eye strain.
+    """
+    COLOR_PALETTE = {
+        'welcome': '#0D9488',           # Soft teal
+        'research_fact': '#3B82F6',     # Soft blue
+        'motivation': '#10B981',        # Soft emerald green
+        'qa': '#8B5CF6',                # Soft purple
+        'conditional_response': '#F59E0B',  # Soft amber
+        'tip': '#06B6D4',               # Soft cyan
+    }
+
+    for card in cards_data:
+        card_type = card.get('type', 'motivation')
+        card['background_color'] = COLOR_PALETTE.get(card_type, '#0D9488')
+
+    return cards_data
 
 
 def validate_card_graph(cards_data: List[Dict], start_id: str) -> bool:
@@ -314,6 +351,9 @@ def generate_bites(profile: PatientProfile, db: Session) -> Dict:
         # Fall back to static bites
         from app.services.fallback_bites import get_fallback_bites
         return get_fallback_bites()
+
+    # Assign colors based on card type (softer, eye-friendly palette)
+    cards_data = assign_card_colors(cards_data)
 
     # Return result with metadata
     return {
