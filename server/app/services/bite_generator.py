@@ -337,7 +337,9 @@ def generate_bites(profile: PatientProfile, db: Session) -> Dict:
         result = call_llm(system_prompt, user_prompt)
         print(f"[Bite Generator] LLM call successful, got {len(result.get('cards', []))} cards")
     except Exception as e:
+        import traceback
         print(f"[Bite Generator] LLM call failed: {e}")
+        print(f"[Bite Generator] Full traceback: {traceback.format_exc()}")
         # Fall back to static bites
         from app.services.fallback_bites import get_fallback_bites
         print(f"[Bite Generator] Using fallback bites")
