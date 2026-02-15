@@ -123,15 +123,22 @@ export default function StrokeBitesScreen() {
     goNext(option.next_card_id);
   };
 
-  const handleTap = (x: number, screenWidth: number) => {
+  const handleTap = (event: any) => {
     const card = getCurrentCard();
     if (!card) return;
 
     // Q&A cards require option selection, not tap navigation
     if (card.type === 'qa') return;
 
+    // Get tap location and screen width
+    const { locationX, pageX } = event.nativeEvent;
+    const tapX = locationX || pageX || 0;
+
+    // Use Dimensions to get screen width
+    const { width: screenWidth } = require('react-native').Dimensions.get('window');
+
     // Left half = back, right half = forward
-    if (x < screenWidth / 2) {
+    if (tapX < screenWidth / 2) {
       goBack();
     } else {
       goNext();
@@ -220,7 +227,7 @@ export default function StrokeBitesScreen() {
   return (
     <Pressable
       style={[styles.container, { backgroundColor: currentCard.background_color }]}
-      onPress={(e) => handleTap(e.nativeEvent.locationX, e.nativeEvent.layout.width)}
+      onPress={handleTap}
     >
       <StatusBar hidden />
       <Stack.Screen options={{ headerShown: false }} />
