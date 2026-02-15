@@ -42,6 +42,9 @@ htmlcov/
 *.jks
 *.keystore
 
+# Claude Code
+.claude/
+
 # Misc
 *.bak
 *.tmp

@@ -262,6 +262,40 @@ export default function GamesScreen() {
           <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
         </TouchableOpacity>
 
+        {/* Whack-a-Mole Game Button */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#DC2626' }]}
+          onPress={() => router.push('/play-whack-mole')}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🔨</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Whack-a-Mole
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Tap the animals before they hide
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
+        {/* Pattern Repeat Game Button */}
+        <TouchableOpacity
+          style={[styles.gameButton, { backgroundColor: '#7C3AED' }]}
+          onPress={() => router.push('/play-pattern-repeat')}
+        >
+          <Text style={[styles.gameButtonEmoji, { fontSize: 40 * fontScale }]}>🧠</Text>
+          <View style={styles.gameButtonText}>
+            <Text style={[styles.gameButtonTitle, { fontSize: 18 * fontScale }]}>
+              Pattern Repeat
+            </Text>
+            <Text style={[styles.gameButtonSubtitle, { fontSize: 14 * fontScale }]}>
+              Watch the pattern, then repeat it
+            </Text>
+          </View>
+          <Text style={[styles.gameButtonArrow, { fontSize: 24 * fontScale }]}>→</Text>
+        </TouchableOpacity>
+
         {/* How It Works */}
         <View style={[styles.infoCard, { backgroundColor: colors.background, borderColor: colors.gray[200] }]}>
           <Text style={[styles.infoTitle, { color: colors.gray[800], fontSize: 16 * fontScale }]}>
@@ -350,6 +384,18 @@ export default function GamesScreen() {
             <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>🔍</Text>
             <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
               Odd Out
+            </Text>
+          </View>
+          <View style={[styles.gameTypeCard, { backgroundColor: '#FEE2E2' }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>🔨</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
+              Whack
+            </Text>
+          </View>
+          <View style={[styles.gameTypeCard, { backgroundColor: '#EDE9FE' }]}>
+            <Text style={[styles.gameTypeEmoji, { fontSize: 14 * fontScale }]}>🧠</Text>
+            <Text style={[styles.gameTypeLabel, { color: colors.gray[700], fontSize: 8 * fontScale }]}>
+              Pattern
             </Text>
           </View>
         </View>
