@@ -200,7 +200,7 @@ The Q&A questions should ask about the patient's daily habits, therapy experienc
 or recovery goals - things not already known from their profile.
 
 Example Q&A card structure:
-{
+{{
   "id": "c3",
   "type": "qa",
   "title": null,
@@ -208,12 +208,12 @@ Example Q&A card structure:
   "emoji": "🤔",
   "question": "Do you exercise regularly each week?",
   "options": [
-    {"key": "a", "label": "Yes, 3+ times a week", "next_card_id": "c4a"},
-    {"key": "b", "label": "No, not regularly", "next_card_id": "c4b"}
+    {{"key": "a", "label": "Yes, 3+ times a week", "next_card_id": "c4a"}},
+    {{"key": "b", "label": "No, not regularly", "next_card_id": "c4b"}}
   ],
   "next_card_id": null,
   "source_insight_id": null
-}
+}}
 
 Return ONLY valid JSON, no markdown formatting."""
 
