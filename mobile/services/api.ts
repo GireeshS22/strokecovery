@@ -592,3 +592,64 @@ export const gamesApi = {
   getStats: () =>
     request<GameStats>('/api/games/stats'),
 };
+
+// Stroke Bites types
+export interface BiteOption {
+  key: string;
+  label: string;
+  next_card_id: string;
+}
+
+export interface BiteCard {
+  id: string;
+  type: 'welcome' | 'research_fact' | 'motivation' | 'qa' | 'conditional_response' | 'tip';
+  title: string | null;
+  body: string;
+  emoji: string | null;
+  background_color: string;
+  source_insight_id: string | null;
+  question: string | null;
+  options: BiteOption[] | null;
+  next_card_id: string | null;
+}
+
+export interface StrokeBiteResponse {
+  id: string;
+  generated_date: string;
+  cards: BiteCard[];
+  start_card_id: string;
+  total_cards: number;
+  card_sequence_length: number;
+}
+
+export interface StrokeBiteAnswerItem {
+  card_id: string;
+  selected_key: string;
+  question_text?: string;
+  selected_label?: string;
+}
+
+export interface StrokeBiteAnswerCreate {
+  bite_id: string;
+  answers: StrokeBiteAnswerItem[];
+}
+
+// Stroke Bites API
+export const strokeBitesApi = {
+  getToday: () =>
+    request<StrokeBiteResponse>('/api/stroke-bites/today'),
+
+  generate: () =>
+    request<StrokeBiteResponse>('/api/stroke-bites/generate', {
+      method: 'POST',
+    }),
+
+  saveAnswers: (data: StrokeBiteAnswerCreate) =>
+    request<{ id: string; bite_id: string; saved: boolean; answers_count: number }>(
+      '/api/stroke-bites/answers',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    ),
+};

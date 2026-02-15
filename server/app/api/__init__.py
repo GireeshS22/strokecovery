@@ -7,6 +7,7 @@ from .mood import router as mood_router
 from .ailment import router as ailment_router
 from .calendar import router as calendar_router
 from .games import router as games_router
+from .stroke_bites import router as stroke_bites_router
 
 api_router = APIRouter()
 
@@ -18,3 +19,4 @@ api_router.include_router(mood_router, prefix="/mood", tags=["Mood"])
 api_router.include_router(ailment_router, prefix="/ailments", tags=["Ailments"])
 api_router.include_router(calendar_router, prefix="/calendar", tags=["Calendar"])
 api_router.include_router(games_router, prefix="/games", tags=["Games"])
+api_router.include_router(stroke_bites_router, prefix="/stroke-bites", tags=["Stroke Bites"])
