@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 import { router, useFocusEffect } from 'expo-router';
 import { Colors, HighContrastColors } from '../../constants/colors';
 import { useAccessibility } from '../../contexts/AccessibilityContext';
-import { medicinesApi, Medicine, MedicineTodayResponse } from '../../services/api';
+import { medicinesApi, medicineInfoApi, Medicine, MedicineTodayResponse, MedicineInfoResponse } from '../../services/api';
 
 const TIMING_LABELS: Record<string, string> = {
   before_food: 'Before food',
@@ -29,6 +29,7 @@ export default function MedicinesScreen() {
   const [todaySchedule, setTodaySchedule] = useState<MedicineTodayResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [medicineInfoMap, setMedicineInfoMap] = useState<Record<string, MedicineInfoResponse>>({});
 
   const loadData = async (showRefresh = false) => {
     if (showRefresh) setIsRefreshing(true);
@@ -40,6 +41,15 @@ export default function MedicinesScreen() {
       ]);
       setMedicines(medicinesList);
       setTodaySchedule(today);
+
+      // Fire-and-forget: fetch medicine info for all medicines in background
+      medicinesList.forEach((med) => {
+        medicineInfoApi.lookup(med.name)
+          .then((info) => {
+            setMedicineInfoMap((prev) => ({ ...prev, [med.name]: info }));
+          })
+          .catch(() => {}); // Silently ignore failures
+      });
     } catch (error: any) {
       console.log('Failed to load medicines:', error.message);
     } finally {
@@ -176,6 +186,13 @@ export default function MedicinesScreen() {
                     <Text style={[styles.medicineName, { color: colors.gray[900], fontSize: 16 * fontScale }]}>{medicine.name}</Text>
                     {medicine.dosage && (
                       <Text style={[styles.medicineDosage, { color: colors.gray[700], fontSize: 14 * fontScale }]}>{medicine.dosage}</Text>
+                    )}
+                    {medicineInfoMap[medicine.name] && (medicineInfoMap[medicine.name].drug_class || medicineInfoMap[medicine.name].used_for) && (
+                      <Text style={[styles.medicineInfoText, { color: colors.gray[500], fontSize: 12 * fontScale }]}>
+                        {[medicineInfoMap[medicine.name].drug_class, medicineInfoMap[medicine.name].used_for]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </Text>
                     )}
                     <Text style={[styles.medicineSchedule, { color: colors.gray[500], fontSize: 13 * fontScale }]}>
                       {getScheduleText(medicine)} • {TIMING_LABELS[medicine.timing]}
@@ -356,6 +373,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.gray[700],
     marginTop: 2,
+  },
+  medicineInfoText: {
+    fontSize: 12,
+    color: Colors.gray[500],
+    marginTop: 2,
+    fontStyle: 'italic',
   },
   medicineSchedule: {
     fontSize: 13,

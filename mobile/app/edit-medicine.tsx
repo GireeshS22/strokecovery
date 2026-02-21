@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,14 @@ import {
   ActivityIndicator,
   Platform,
   TextInput,
+  FlatList,
   Modal,
   Switch,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Colors } from '../constants/colors';
-import { medicinesApi, Medicine } from '../services/api';
+import { medicinesApi, medicineInfoApi, Medicine, MedicineInfoResponse } from '../services/api';
 import { scheduleMedicineNotifications, cancelMedicineNotifications } from '../services/notifications';
 
 const TIMING_OPTIONS = [
@@ -42,6 +43,36 @@ export default function EditMedicineScreen() {
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+
+  // Autocomplete state
+  const [suggestions, setSuggestions] = useState<MedicineInfoResponse[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleNameChange = useCallback((text: string) => {
+    setName(text);
+    setShowSuggestions(false);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    if (text.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    debounceTimer.current = setTimeout(async () => {
+      try {
+        const results = await medicineInfoApi.search(text.trim());
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 300);
+  }, []);
+
+  const handleSuggestionSelect = (item: MedicineInfoResponse) => {
+    setName(item.medicine_name);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
 
   useEffect(() => {
     if (id) loadMedicine();
@@ -175,15 +206,34 @@ export default function EditMedicineScreen() {
       </View>
 
       {/* Medicine Name */}
-      <View style={styles.section}>
+      <View style={[styles.section, { zIndex: 999 }]}>
         <Text style={styles.sectionTitle}>Medicine Name *</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="e.g., Aspirin, Metformin"
-          placeholderTextColor={Colors.gray[400]}
-          value={name}
-          onChangeText={setName}
-        />
+        <View style={styles.autocompleteContainer}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="e.g., Aspirin, Metformin"
+            placeholderTextColor={Colors.gray[400]}
+            value={name}
+            onChangeText={handleNameChange}
+          />
+          {showSuggestions && (
+            <View style={styles.dropdown}>
+              <FlatList
+                data={suggestions}
+                keyExtractor={(item) => item.medicine_name}
+                keyboardShouldPersistTaps="handled"
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.suggestionItem}
+                    onPress={() => handleSuggestionSelect(item)}
+                  >
+                    <Text style={styles.suggestionText}>{item.medicine_name}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          )}
+        </View>
       </View>
 
       {/* Dosage */}
@@ -492,6 +542,36 @@ const styles = StyleSheet.create({
   notesInput: {
     height: 80,
     textAlignVertical: 'top',
+  },
+  autocompleteContainer: {
+    position: 'relative',
+  },
+  dropdown: {
+    position: 'absolute',
+    top: 52,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.gray[200],
+    borderRadius: 12,
+    maxHeight: 200,
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  suggestionItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.gray[100],
+  },
+  suggestionText: {
+    fontSize: 16,
+    color: Colors.gray[900],
   },
   scheduleRow: {
     flexDirection: 'row',

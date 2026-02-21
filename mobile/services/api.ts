@@ -595,6 +595,27 @@ export const gamesApi = {
     request<GameStats>('/api/games/stats'),
 };
 
+// Medicine Info types
+export interface MedicineInfoResponse {
+  medicine_name: string;
+  combination: string | null;
+  drug_class: string | null;
+  used_for: string | null;
+}
+
+// Medicine Info API
+export const medicineInfoApi = {
+  lookup: (name: string) =>
+    request<MedicineInfoResponse>(
+      `/api/medicine-info/lookup?name=${encodeURIComponent(name)}`
+    ),
+
+  search: (query: string) =>
+    request<MedicineInfoResponse[]>(
+      `/api/medicine-info/search?q=${encodeURIComponent(query)}`
+    ),
+};
+
 // Stroke Bites types
 export interface BiteOption {
   key: string;
