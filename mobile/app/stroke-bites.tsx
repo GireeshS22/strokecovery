@@ -1,9 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, StatusBar, ActivityIndicator, ScrollView } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { Colors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { strokeBitesApi, BiteCard, BiteOption, StrokeBiteResponse } from '../services/api';
+
+const CONTINUITY_ACTIONS = [
+  {
+    emoji: '🎮',
+    label: 'Play a game',
+    nudge: 'Keep your mind sharp with a quick brain game.',
+    route: '/games',
+  },
+  {
+    emoji: '🏃',
+    label: 'Log a therapy session',
+    nudge: 'Track your progress — every session counts.',
+    route: '/add-session',
+  },
+  {
+    emoji: '💊',
+    label: 'Check your medicines',
+    nudge: 'Stay on top of your medication schedule.',
+    route: '/(tabs)/medicines',
+  },
+  {
+    emoji: '😊',
+    label: 'Track your mood',
+    nudge: 'How are you feeling today? Take a moment to log it.',
+    route: '/add-mood',
+  },
+  {
+    emoji: '📋',
+    label: 'Log a symptom',
+    nudge: 'Noticed something today? Record it for your doctor.',
+    route: '/add-ailment',
+  },
+];
 
 export default function StrokeBitesScreen() {
   const { fontScale } = useAccessibility();
@@ -16,6 +49,12 @@ export default function StrokeBitesScreen() {
   const [cardHistory, setCardHistory] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Record<string, { key: string; label: string; question: string }>>({});
   const [completed, setCompleted] = useState(false);
+
+  // Pick a random continuity action once per session
+  const continuityAction = useMemo(
+    () => CONTINUITY_ACTIONS[Math.floor(Math.random() * CONTINUITY_ACTIONS.length)],
+    []
+  );
 
   // Load bites on mount
   useEffect(() => {
@@ -195,6 +234,11 @@ export default function StrokeBitesScreen() {
   }
 
   if (completed) {
+    const handleContinuityPress = async () => {
+      await saveAnswers();
+      router.replace(continuityAction.route as any);
+    };
+
     return (
       <View style={[styles.container, { backgroundColor: Colors.primary[600] }]}>
         <StatusBar hidden />
@@ -202,17 +246,38 @@ export default function StrokeBitesScreen() {
         <View style={styles.completionContainer}>
           <Text style={[styles.completionEmoji, { fontSize: 64 * fontScale }]}>✨</Text>
           <Text style={[styles.completionTitle, { fontSize: 24 * fontScale }]}>
-            You've finished today's bites!
+            That's all for today!
           </Text>
           <Text style={[styles.completionSubtitle, { fontSize: 16 * fontScale }]}>
-            Come back tomorrow for more insights
+            Keep the momentum going
           </Text>
+
+          {/* Continuity action card */}
           <TouchableOpacity
-            style={styles.doneButton}
+            style={styles.continuityCard}
+            onPress={handleContinuityPress}
+            activeOpacity={0.85}
+          >
+            <Text style={[styles.continuityEmoji, { fontSize: 36 * fontScale }]}>
+              {continuityAction.emoji}
+            </Text>
+            <View style={styles.continuityTextContainer}>
+              <Text style={[styles.continuityLabel, { fontSize: 18 * fontScale }]}>
+                {continuityAction.label}
+              </Text>
+              <Text style={[styles.continuityNudge, { fontSize: 14 * fontScale }]}>
+                {continuityAction.nudge}
+              </Text>
+            </View>
+            <Text style={[styles.continuityArrow, { fontSize: 20 * fontScale }]}>→</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.maybeLaterButton}
             onPress={handleClose}
           >
-            <Text style={[styles.doneButtonText, { fontSize: 18 * fontScale }]}>
-              Done
+            <Text style={[styles.maybeLaterText, { fontSize: 15 * fontScale }]}>
+              Maybe later
             </Text>
           </TouchableOpacity>
         </View>
@@ -465,14 +530,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 48,
   },
-  doneButton: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 48,
-    paddingVertical: 16,
-    borderRadius: 16,
+  continuityCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: 20,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 8,
+    marginBottom: 8,
+    gap: 14,
   },
-  doneButtonText: {
-    color: Colors.primary[600],
+  continuityEmoji: {
+    lineHeight: 44,
+  },
+  continuityTextContainer: {
+    flex: 1,
+  },
+  continuityLabel: {
+    color: '#fff',
     fontWeight: '700',
+    marginBottom: 4,
+  },
+  continuityNudge: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    lineHeight: 20,
+  },
+  continuityArrow: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  maybeLaterButton: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+  },
+  maybeLaterText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontWeight: '500',
   },
 });
