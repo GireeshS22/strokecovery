@@ -104,10 +104,13 @@ def get_or_create_medicine_info(medicine_name: str, db: Session) -> MedicineInfo
 
 
 def search_medicine_names(query: str, db: Session, limit: int = 10):
-    """Return MedicineInfo rows whose name contains the query string (case-insensitive)."""
+    """Return MedicineInfo rows whose name contains the query string (case-insensitive).
+    Excludes entries with an unknown or missing drug class."""
     return (
         db.query(MedicineInfo)
         .filter(MedicineInfo.medicine_name.ilike(f"%{query}%"))
+        .filter(MedicineInfo.drug_class.isnot(None))
+        .filter(func.lower(MedicineInfo.drug_class) != "unknown")
         .limit(limit)
         .all()
     )
