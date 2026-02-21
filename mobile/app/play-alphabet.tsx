@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Stack, router } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { gamesApi } from '../services/api';
@@ -105,6 +106,7 @@ export default function PlayAlphabetScreen() {
 
     if (index === currentTargetIndex) {
       playSound('tap');
+      Speech.speak(LETTERS[index], { rate: 0.9 });
       setCompletedIndices(prev => [...prev, index]);
       setShowHint(false);
 
