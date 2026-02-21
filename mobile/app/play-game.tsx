@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { gamesApi } from '../services/api';
@@ -77,6 +78,14 @@ export default function PlayGameScreen() {
 
     // Play sound
     playSound(correct ? 'correct' : 'wrong');
+
+    // Speak the word on correct answer
+    if (correct) {
+      const word = game.type === 'emoji_to_word'
+        ? game.options[index].label   // user just matched emoji → word
+        : game.prompt;                // user just matched word → emoji; speak the word
+      Speech.speak(word, { rate: 0.9 });
+    }
 
     setSelectedIndex(index);
     setIsCorrect(correct);
