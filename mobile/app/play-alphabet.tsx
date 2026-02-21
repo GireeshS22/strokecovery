@@ -105,7 +105,7 @@ export default function PlayAlphabetScreen() {
     if (isComplete) return;
 
     if (index === currentTargetIndex) {
-      playSound('tap');
+      // Correct tap — speech voiceover replaces the tap sound
       Speech.speak(LETTERS[index], { rate: 0.9 });
       setCompletedIndices(prev => [...prev, index]);
       setShowHint(false);

@@ -184,8 +184,7 @@ export default function PlaySequenceScreen() {
     if (isComplete) return;
 
     if (index === currentTargetIndex) {
-      // Correct tap
-      playSound('tap');
+      // Correct tap — speech voiceover replaces the tap sound
       Speech.speak(String(numbers[index]), { rate: 0.9 });
       setCompletedIndices(prev => [...prev, index]);
       setShowHint(false); // Reset hint for next number

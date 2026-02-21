@@ -76,8 +76,8 @@ export default function PlayGameScreen() {
     const correct = game.options[index].isCorrect;
     const timeSeconds = Math.round((Date.now() - startTime) / 1000);
 
-    // Play sound
-    playSound(correct ? 'correct' : 'wrong');
+    // Play sound (wrong only — correct tap uses speech voiceover instead)
+    if (!correct) playSound('wrong');
 
     // Speak the word on correct answer
     if (correct) {
