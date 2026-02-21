@@ -65,6 +65,12 @@
     <meta name="target" content="all">
     <meta name="HandheldFriendly" content="True">
     <meta name="MobileOptimized" content="320">
+    <meta name="subject" content="Stroke Recovery, AI Rehabilitation, TBI Recovery, Speech Therapy, Cognitive Training">
+    <meta name="abstract" content="Strokecovery is an AI-powered stroke recovery app offering computer vision motion tracking, mirror therapy, aphasia coaching, cognitive games, and a real-time caregiver and clinician dashboard.">
+    <meta name="category" content="Health, Medical, Rehabilitation">
+    <meta name="classification" content="Health/Medical">
+    <meta name="topic" content="Stroke Recovery, Rehabilitation Technology, Neuroplasticity">
+    <meta name="summary" content="The Gym, the Library, and the Nurse — in your pocket. AI-powered stroke rehab for survivors, caregivers, and clinicians.">
 
     <!-- Structured Data - Organization -->
     <script type="application/ld+json">
@@ -139,9 +145,63 @@
         "name": "Strokecovery",
         "url": "https://strokecovery.com",
         "description": "The AI-powered stroke recovery companion app",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://strokecovery.com/?s={search_term_string}",
+            "query-input": "required name=search_term_string"
+        },
         "publisher": {
             "@type": "Organization",
             "name": "Strokecovery"
+        }
+    }
+    </script>
+
+    <!-- Structured Data - MedicalWebPage -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "MedicalWebPage",
+        "name": "Strokecovery - AI-Powered Stroke Recovery App",
+        "url": "https://strokecovery.com",
+        "description": "AI-powered stroke recovery platform combining computer vision rehab, speech therapy, cognitive training, and a caregiver dashboard for stroke and TBI survivors.",
+        "medicalAudience": [
+            {
+                "@type": "MedicalAudience",
+                "audienceType": "Patient",
+                "healthCondition": {
+                    "@type": "MedicalCondition",
+                    "name": "Stroke"
+                }
+            },
+            {
+                "@type": "MedicalAudience",
+                "audienceType": "Patient",
+                "healthCondition": {
+                    "@type": "MedicalCondition",
+                    "name": "Traumatic Brain Injury"
+                }
+            },
+            {
+                "@type": "MedicalAudience",
+                "audienceType": "Clinician"
+            }
+        ],
+        "specialty": [
+            "Neurology",
+            "Physical Therapy",
+            "Speech-Language Pathology",
+            "Occupational Therapy",
+            "Cognitive Rehabilitation"
+        ],
+        "about": {
+            "@type": "MedicalCondition",
+            "name": "Stroke",
+            "alternateName": ["Cerebrovascular accident", "CVA", "Brain stroke", "TBI"],
+            "associatedAnatomy": {
+                "@type": "AnatomicalStructure",
+                "name": "Brain"
+            }
         }
     }
     </script>
@@ -196,11 +256,13 @@
     }
     </script>
 
-    <!-- Preconnect for Performance -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <!-- Preconnect & Performance Hints -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://lrihhfevykavhsrmjtmk.supabase.co" crossorigin>
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://lrihhfevykavhsrmjtmk.supabase.co">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
