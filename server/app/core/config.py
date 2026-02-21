@@ -17,6 +17,12 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440  # 24 hours
 
+    # LLM Services (for Stroke Bites)
+    together_api_key: str
+    together_model: str = "meta-llama/Llama-3.3-70B-Instruct-Turbo"
+    openai_api_key: str
+    embedding_model: str = "text-embedding-ada-002"
+
     # App info
     app_name: str = "Strokecovery API"
     debug: bool = False

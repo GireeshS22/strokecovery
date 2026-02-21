@@ -48,6 +48,25 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* Daily Stroke Bites */}
+      <TouchableOpacity
+        style={[styles.bitesCard, { backgroundColor: '#7C3AED' }]}
+        onPress={() => router.push('/stroke-bites')}
+      >
+        <View style={styles.bitesCardContent}>
+          <Text style={[styles.bitesEmoji, { fontSize: 40 * fontScale }]}>📰</Text>
+          <View style={styles.bitesCardText}>
+            <Text style={[styles.bitesTitle, { fontSize: 16 * fontScale }]}>
+              Daily Stroke Bites
+            </Text>
+            <Text style={[styles.bitesSubtitle, { fontSize: 14 * fontScale }]}>
+              Your personalized recovery insights
+            </Text>
+          </View>
+          <Text style={[styles.bitesArrow, { fontSize: 24 * fontScale }]}>›</Text>
+        </View>
+      </TouchableOpacity>
+
       {/* Quick Actions */}
       <Text style={[styles.sectionTitle, { color: colors.gray[800], fontSize: 18 * fontScale }]}>Quick Actions</Text>
       <View style={styles.actionsGrid}>
@@ -246,5 +265,37 @@ const styles = StyleSheet.create({
   streakBadgeText: {
     color: '#92400E',
     fontWeight: '600',
+  },
+  bitesCard: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  bitesCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bitesEmoji: {
+    marginRight: 16,
+  },
+  bitesCardText: {
+    flex: 1,
+  },
+  bitesTitle: {
+    color: '#fff',
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  bitesSubtitle: {
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  bitesArrow: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginLeft: 8,
   },
 });
