@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Animated } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { Colors, HighContrastColors } from '../constants/colors';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { gamesApi } from '../services/api';
@@ -185,6 +186,7 @@ export default function PlaySequenceScreen() {
     if (index === currentTargetIndex) {
       // Correct tap
       playSound('tap');
+      Speech.speak(String(numbers[index]), { rate: 0.9 });
       setCompletedIndices(prev => [...prev, index]);
       setShowHint(false); // Reset hint for next number
 
